@@ -87,7 +87,7 @@ typedef enum {
     TCOAP_WRONG_STATE_ERROR,
 
     TCOAP_NO_OPTIONS_ERROR,
-    TCOAP_WRONG_OPTIONS_ERROR,
+    TCOAP_WRONG_OPTIONS_ERROR
 
 } __tcoap_error;
 
@@ -156,7 +156,7 @@ typedef enum {
     TCOAP_RESP_SUCCESS_DELETED_202 = TCOAP_CODE(TCOAP_SUCCESS_CLASS, 2),
     TCOAP_RESP_SUCCESS_VALID_203 = TCOAP_CODE(TCOAP_SUCCESS_CLASS, 3),
     TCOAP_RESP_SUCCESS_CHANGED_204 = TCOAP_CODE(TCOAP_SUCCESS_CLASS, 4),
-    TCOAP_RESP_SUCCESS_CONTENT_2_05 = TCOAP_CODE(TCOAP_SUCCESS_CLASS, 5),
+    TCOAP_RESP_SUCCESS_CONTENT_205 = TCOAP_CODE(TCOAP_SUCCESS_CLASS, 5),
 
     TCOAP_RESP_ERROR_BAD_REQUEST_400 = TCOAP_CODE(TCOAP_BAD_REQUEST_CLASS, 0),
     TCOAP_RESP_ERROR_UNAUTHORIZED_401 = TCOAP_CODE(TCOAP_BAD_REQUEST_CLASS, 1),
@@ -266,7 +266,7 @@ typedef struct __tcoap_result_data {
 
     uint8_t resp_code;
     __tcoap_data payload;
-    __tcoap_option_data * options;
+    __tcoap_option_data * options;   /* NULL terminated linked list of options */
 
 } __tcoap_result_data;
 
