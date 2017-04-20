@@ -12,8 +12,8 @@
 #define TCOAP_MIN_TCP_HEADER_LEN     2u
 
 #define TCOAP_TCP_LEN_1BYTE          13
-#define TCOAP_TCP_LEN_2BYTE          14
-#define TCOAP_TCP_LEN_4BYTE          15
+#define TCOAP_TCP_LEN_2BYTES         14
+#define TCOAP_TCP_LEN_4BYTES         15
 
 #define TCOAP_TCP_LEN_MIN            13
 #define TCOAP_TCP_LEN_MED            269
@@ -232,7 +232,7 @@ static void asemble_request(__tcoap_handle * const handle, __tcoap_data * const 
 
     } else if (request->len < TCOAP_TCP_LEN_MAX) {
 
-        header.fields.len = TCOAP_TCP_LEN_2BYTE;
+        header.fields.len = TCOAP_TCP_LEN_2BYTES;
         request->buf[0] = header.byte;
 
         /* check on shift data */
@@ -254,7 +254,7 @@ static void asemble_request(__tcoap_handle * const handle, __tcoap_data * const 
 
     } else {
 
-        header.fields.len = TCOAP_TCP_LEN_4BYTE;
+        header.fields.len = TCOAP_TCP_LEN_4BYTES;
         request->buf[0] = header.byte;
 
         /* check on shift data */
@@ -392,14 +392,14 @@ static uint32_t extract_payload_length(__tcoap_tcp_header * const header, const 
             header->data_len = buf[idx++] + TCOAP_TCP_LEN_MIN;
             break;
 
-        case TCOAP_TCP_LEN_2BYTE:
+        case TCOAP_TCP_LEN_2BYTES:
             header->data_len = buf[idx++];
             header->data_len <<= 8;
             header->data_len |= buf[idx++];
             header->data_len += TCOAP_TCP_LEN_MED;
             break;
 
-        case TCOAP_TCP_LEN_4BYTE:
+        case TCOAP_TCP_LEN_4BYTES:
             header->data_len = buf[idx++];
             header->data_len <<= 8;
             header->data_len |= buf[idx++];
