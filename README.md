@@ -60,7 +60,7 @@ void eth_rx_irq_handler(uint8_t * data, uint32_t len)
 
 ```
 
-5) Send coap request:
+5) Send a coap request and get back response data in the provided callback:
 
 ```
 __tcoap_error err;
