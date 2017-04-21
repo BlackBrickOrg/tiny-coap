@@ -4,7 +4,7 @@ Allows to add the CoAP functionality for embedded device.
 
 #### Features
 
-- very small memory consumption (in the common case it may be about amount of 200 bytes for rx/tx buffers)
+- very small memory consumption (in the common case it may be about of 200 bytes for rx/tx buffers)
 
 - implemented CoAP over UDP [rfc7252](https://tools.ietf.org/html/rfc7252)
 
