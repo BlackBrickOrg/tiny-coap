@@ -207,6 +207,10 @@ typedef enum {
     TCOAP_URI_QUERY_OPT        = 15,
     TCOAP_ACCEPT_OPT           = 17,
     TCOAP_LOCATION_QUERY_OPT   = 20,
+    
+    TCOAP_BLOCK2_OPT           = 23,  /* block-wise options */
+    TCOAP_BLOCK1_OPT           = 27,
+    
     TCOAP_PROXY_URI_OPT        = 35,
     TCOAP_PROXY_SCHEME_OPT     = 39,
     TCOAP_SIZE1_OPT            = 60
