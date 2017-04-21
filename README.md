@@ -18,7 +18,7 @@ Allows to add the CoAP functionality for embedded device.
 #### How to send CoAP request to server
 
 1) There are several functions in `tcoap.h` which declared how `external`. You should provide it implementation in your code.
-See wiki for common case of their implementation.
+See [wiki](https://github.com/Mozilla9/tiny-coap/wiki) for common case of their implementation.
 
 
 2) Define a `tcoap_handle` object, e.g.
