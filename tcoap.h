@@ -308,28 +308,79 @@ typedef struct __tcoap_handle {
 } __tcoap_handle;
 
 
-
 /**
- * @brief Extern API that user should provide
- *
+ * @brief In this function user should implement a transmission given data via 
+ *        hardware interface (e.g. serial port)
+ * 
  */
 extern __tcoap_error tcoap_tx_data(__tcoap_handle * const handle, const uint8_t *buf, const uint32_t len);
+
+
+/**
+ * @brief In this function user should implement a response waiting functionality. 
+ *        This function should returns control when timeout will be expired or 
+ *        when response from server will be received.
+ */
 extern __tcoap_error tcoap_wait_event(__tcoap_handle * const handle, const uint32_t timeout_ms);
+
+
+/**
+ * @brief In this function 'tcoap' lib notify user about events. 
+          See possible events here '__tcoap_out_signal'.
+ */
 extern __tcoap_error tcoap_tx_signal(__tcoap_handle * const handle, const __tcoap_out_signal signal);
 
+
+/**
+ * @brief In this function user should implement generating of message id.
+ * 
+ */
 extern uint16_t tcoap_get_message_id(__tcoap_handle * const handle);
+
+
+/**
+ * @brief In this function user should implement generating of token.
+ * 
+ */
 extern __tcoap_error tcoap_fill_token(__tcoap_handle * const handle, uint8_t *token, const uint32_t tkl);
 
+
+/**
+ * @brief These functions are using for debug purpose, if user will enable debug mode.
+ * 
+ */
 extern void tcoap_debug_print_packet(__tcoap_handle * const handle, const char * msg, uint8_t *data, const uint32_t len);
 extern void tcoap_debug_print_options(__tcoap_handle * const handle, const char * msg, const __tcoap_option_data * options);
 extern void tcoap_debug_print_payload(__tcoap_handle * const handle, const char * msg, const __tcoap_data * const payload);
 
+
+/**
+ * @brief In this function user should implement allocating mem block.
+ *        In simple case it may be a static buffer.
+ * 
+ */
 extern __tcoap_error tcoap_alloc_mem_block(uint8_t **block, const uint32_t min_len);
+
+
+/**
+ * @brief In this function user should implement freeing mem block.
+ * 
+ */
 extern __tcoap_error tcoap_free_mem_block(uint8_t *block, const uint32_t min_len);
 
-extern void mem_copy(void *dst, const void *src, uint32_t cnt);
-extern bool mem_cmp(const void *dst, const void *src, uint32_t cnt);
 
+/**
+ * @brief In this function user should implement copying mem block.
+ * 
+ */
+extern void mem_copy(void *dst, const void *src, uint32_t cnt);
+
+
+/**
+ * @brief In this function user should implement comparing two mem blocks.
+ * 
+ */
+extern bool mem_cmp(const void *dst, const void *src, uint32_t cnt);
 
 
 /**
