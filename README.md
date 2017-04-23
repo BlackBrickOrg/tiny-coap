@@ -17,10 +17,14 @@ Allows to add the CoAP functionality for embedded device.
 
 #### How to send CoAP request to server
 
-1) There are several functions in the `tcoap.h` which declared how `external`. You should provide it implementation in your code.
-See [wiki](https://github.com/Mozilla9/tiny-coap/wiki) for common case of their implementation.
+1) Include `tcoap.h` in your code.
 
-Then you should define your func for memory copying/comparing. You may define  a system implementation or own. In the constrained context I prefer own implementation because it not links system libs.
+```
+#include "tcoap.h"
+
+```
+  There are several functions in the `tcoap.h` which declared how `external`. You should provide it implementation in your code. See [wiki](https://github.com/Mozilla9/tiny-coap/wiki) for common case of their implementation.
+  Then you should define your func for memory copying/comparing. You may define  a system implementation or own. In the constrained context I prefer own implementation because it not links system libs.
 
 ```
 
