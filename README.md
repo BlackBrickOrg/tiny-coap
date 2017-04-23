@@ -35,8 +35,9 @@ __tcoap_handle tcoap_handle = {
 3) Implement a transfer of incoming data from your hardware interface (e.g. serial port) to the `tcoap` via functions `tcoap_rx_byte` or `tcoap_rx_packet`. E.g.
 
 ```
-void uart_rx_irq_handler(uint8_t byte)
+void uart1_rx_irq_handler()
 {
+    uint8_t byte = UART1_DR;    
     tcoap_rx_byte(&tcoap_handle, byte);
 }
 
