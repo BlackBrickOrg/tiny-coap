@@ -20,6 +20,20 @@ Allows to add the CoAP functionality for embedded device.
 1) There are several functions in the `tcoap.h` which declared how `external`. You should provide it implementation in your code.
 See [wiki](https://github.com/Mozilla9/tiny-coap/wiki) for common case of their implementation.
 
+Then you should define your func for memory copying/comparing. You may define  a system implementation or own. In the constrained context I prefer own implementation because it not links system libs.
+
+```
+
+#ifndef TCOAP_MEM_COPY
+#define TCOAP_MEM_COPY(dst,src,cnt)     mem_copy((dst),(src),(cnt)) /* void mem_copy(void *dst, const void *src, uint32_t cnt); */
+#endif /* TCOAP_MEM_COPY */
+
+#ifndef TCOAP_MEM_CMP
+#define TCOAP_MEM_CMP(dst,src,cnt)      mem_cmp((dst),(src),(cnt))  /* bool mem_cmp(void *dst, const void *src, uint32_t cnt); */
+#endif /* TCOAP_MEM_CMP */
+
+```
+
 
 2) Define a `tcoap_handle` object, e.g.
 
