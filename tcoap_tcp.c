@@ -345,7 +345,7 @@ static uint32_t parse_response(const __tcoap_data * const request, const __tcoap
 
         /* check token */
         if (resp_header.len_header.fields.tkl) {
-            if (!mem_cmp(response->buf + resp_idx, request->buf + req_idx + 1, resp_header.len_header.fields.tkl)) {
+            if (!TCOAP_MEM_CMP(response->buf + resp_idx, request->buf + req_idx + 1, resp_header.len_header.fields.tkl)) {
                 goto return_err_label;
             }
         }

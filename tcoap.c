@@ -104,7 +104,7 @@ __tcoap_error tcoap_rx_packet(__tcoap_handle * const handle, const uint8_t * buf
 {
     if (TCOAP_CHECK_STATUS(handle, TCOAP_WAITING_RESP)) {
 
-        mem_copy(handle->response.buf, buf, len < TCOAP_MAX_PDU_SIZE ? len : TCOAP_MAX_PDU_SIZE);
+        TCOAP_MEM_COPY(handle->response.buf, buf, len < TCOAP_MAX_PDU_SIZE ? len : TCOAP_MAX_PDU_SIZE);
         handle->response.len = len;
 
         if (len < TCOAP_MAX_PDU_SIZE) {

@@ -36,6 +36,19 @@
 #define TCOAP_CODE(CLASS,CODE)          (int)((CLASS<<5)|CODE)
 #define TCOAP_EXTRACT_CLASS(c)          (int)((c)>>5)
 
+#define TCOAP_TCP_URI_SCHEME            "coap+tcp"
+#define TCOAP_TCP_SECURE_URI_SCHEME     "coaps+tcp"
+
+#define TCOAP_TCP_DEFAULT_PORT          5683
+#define TCOAP_TCP_DEFAULT_SECURE_PORT   5684
+
+
+#define TCOAP_UDP_URI_SCHEME            "coap"
+#define TCOAP_UDP_SECURE_URI_SCHEME     "coaps"
+
+#define TCOAP_UDP_DEFAULT_PORT          5683
+#define TCOAP_UDP_DEFAULT_SECURE_PORT   5684
+
 #ifndef TCOAP_RESP_TIMEOUT_MS
 #define TCOAP_RESP_TIMEOUT_MS           9000
 #endif /* TCOAP_RESP_TIMEOUT_MS */
@@ -56,19 +69,13 @@
 #define TCOAP_MAX_PDU_SIZE              96        /* maximum size of a CoAP PDU */
 #endif /* TCOAP_MAX_PDU_SIZE */
 
+#ifndef TCOAP_MEM_COPY
+#define TCOAP_MEM_COPY(dst,src,cnt)     mem_copy((dst),(src),(cnt)) /* void mem_copy(void *dst, const void *src, uint32_t cnt); */
+#endif /* TCOAP_MEM_COPY */
 
-#define TCOAP_TCP_URI_SCHEME            "coap+tcp"
-#define TCOAP_TCP_SECURE_URI_SCHEME     "coaps+tcp"
-
-#define TCOAP_TCP_DEFAULT_PORT          5683
-#define TCOAP_TCP_DEFAULT_SECURE_PORT   5684
-
-
-#define TCOAP_UDP_URI_SCHEME            "coap"
-#define TCOAP_UDP_SECURE_URI_SCHEME     "coaps"
-
-#define TCOAP_UDP_DEFAULT_PORT          5683
-#define TCOAP_UDP_DEFAULT_SECURE_PORT   5684
+#ifndef TCOAP_MEM_CMP
+#define TCOAP_MEM_CMP(dst,src,cnt)      mem_cmp((dst),(src),(cnt))  /* bool mem_cmp(void *dst, const void *src, uint32_t cnt); */
+#endif /* TCOAP_MEM_CMP */
 
 
 typedef enum {
@@ -356,7 +363,9 @@ extern void tcoap_debug_print_payload(__tcoap_handle * const handle, const char 
 
 /**
  * @brief In this function user should implement allocating mem block.
- *        In simple case it may be a static buffer.
+ *        In simple case it may be a static buffer. The 'TCOAP' will make a two calls of this functions
+ *        before start (rx and tx buffer).
+ *        So you should have a minimum two separate block of memory.
  * 
  */
 extern __tcoap_error tcoap_alloc_mem_block(uint8_t **block, const uint32_t min_len);
@@ -367,20 +376,6 @@ extern __tcoap_error tcoap_alloc_mem_block(uint8_t **block, const uint32_t min_l
  * 
  */
 extern __tcoap_error tcoap_free_mem_block(uint8_t *block, const uint32_t min_len);
-
-
-/**
- * @brief In this function user should implement copying mem block.
- * 
- */
-extern void mem_copy(void *dst, const void *src, uint32_t cnt);
-
-
-/**
- * @brief In this function user should implement comparing two mem blocks.
- * 
- */
-extern bool mem_cmp(const void *dst, const void *src, uint32_t cnt);
 
 
 /**
