@@ -17,7 +17,7 @@ Allows to add the CoAP functionality for embedded device.
 
 #### How to send CoAP request to server
 
-1) There are several functions in `tcoap.h` which declared how `external`. You should provide it implementation in your code.
+1) There are several functions in the `tcoap.h` which declared how `external`. You should provide it implementation in your code.
 See [wiki](https://github.com/Mozilla9/tiny-coap/wiki) for common case of their implementation.
 
 
@@ -32,7 +32,7 @@ __tcoap_handle tcoap_handle = {
 ```
 
 
-3) Implement a transfer of incoming data from your hardware interface (e.g. serail port) to the `tcoap` via  functions `tcoap_rx_byte` or `tcoap_rx_packet`. E.g.
+3) Implement a transfer of incoming data from your hardware interface (e.g. serial port) to the `tcoap` via functions `tcoap_rx_byte` or `tcoap_rx_packet`. E.g.
 
 ```
 void uart_rx_irq_handler(uint8_t byte)
@@ -64,6 +64,10 @@ void eth_rx_irq_handler(uint8_t * data, uint32_t len)
 
 ```
 __tcoap_error err;
+__tcoap_request_descriptor coap_request;
+
+// fill the `coap_request`
+...
 
 err = tcoap_send_coap_request(&tcoap_handle, &tcoap_request);
 
