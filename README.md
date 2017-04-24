@@ -24,25 +24,12 @@ Allows to add the CoAP functionality for embedded device.
 
 ```
   There are several functions in the `tcoap.h` which declared how `external`. You should provide it implementation in your code. See [wiki](https://github.com/Mozilla9/tiny-coap/wiki) for common case of their implementation.
-  Then you should define your func for memory copying/comparing. You may define  a system implementation or own. In the constrained context I prefer own implementation because it not links system libs.
-
-```
-
-#ifndef TCOAP_MEM_COPY
-#define TCOAP_MEM_COPY(dst,src,cnt)     mem_copy((dst),(src),(cnt)) /* void mem_copy(void *dst, const void *src, uint32_t cnt); */
-#endif /* TCOAP_MEM_COPY */
-
-#ifndef TCOAP_MEM_CMP
-#define TCOAP_MEM_CMP(dst,src,cnt)      mem_cmp((dst),(src),(cnt))  /* bool mem_cmp(void *dst, const void *src, uint32_t cnt); */
-#endif /* TCOAP_MEM_CMP */
-
-```
 
 
 2) Define a `tcoap_handle` object, e.g.
 
 ```
-__tcoap_handle tcoap_handle = {
+tcoap_handle tc_handle = {
         .name = "coap_over_gsm",
         .transport = TCOAP_UDP
 };
@@ -56,18 +43,18 @@ __tcoap_handle tcoap_handle = {
 void uart1_rx_irq_handler()
 {
     uint8_t byte = UART1_DR;    
-    tcoap_rx_byte(&tcoap_handle, byte);
+    tcoap_rx_byte(&tc_handle, byte);
 }
 
 void eth_rx_irq_handler(uint8_t * data, uint32_t len)
 {
-    tcoap_rx_packet(&tcoap_handle, data, len);
+    tcoap_rx_packet(&tc_handle, data, len);
 }
 
 ```
 
 
-4) Define and store request parameters in the `__tcoap_request_descriptor`.
+4) Define and store request parameters in the `tcoap_request_descriptor`.
 
 ```
  - type
@@ -82,12 +69,12 @@ void eth_rx_irq_handler(uint8_t * data, uint32_t len)
 5) Send a coap request and get back response data in the provided callback:
 
 ```
-__tcoap_error err;
-__tcoap_request_descriptor coap_request;
+tcoap_error err;
+tcoap_request_descriptor coap_request;
 
 // fill the `coap_request`
 ...
 
-err = tcoap_send_coap_request(&tcoap_handle, &tcoap_request);
+err = tcoap_send_coap_request(&tc_handle, &tcoap_request);
 
 ```
