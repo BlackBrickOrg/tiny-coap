@@ -1,5 +1,9 @@
 /**
+ * tcoap.c
+ *
  * Author: Serge Maslyakov, rusoil.9@gmail.com
+ * Copyright 2017 Serge Maslyakov. All rights reserved.
+ *
  */
 
 
@@ -11,8 +15,8 @@
 
 
 
-static __tcoap_error init_coap_driver(__tcoap_handle * const handle, const __tcoap_request_descriptor * const dr);
-static void deinit_coap_driver(__tcoap_handle *handle);
+static tcoap_error init_coap_driver(tcoap_handle * const handle, const tcoap_request_descriptor * const reqd);
+static void deinit_coap_driver(tcoap_handle *handle);
 
 
 
@@ -20,7 +24,7 @@ static void deinit_coap_driver(__tcoap_handle *handle);
  * @brief See description in the header file.
  *
  */
-void tcoap_debug(__tcoap_handle * const handle, const bool enable)
+void tcoap_debug(tcoap_handle * const handle, const bool enable)
 {
     if (enable) {
         TCOAP_SET_STATUS(handle, TCOAP_DEBUG_ON);
@@ -34,9 +38,9 @@ void tcoap_debug(__tcoap_handle * const handle, const bool enable)
  * @brief See description in the header file.
  *
  */
-__tcoap_error tcoap_send_coap_request(__tcoap_handle * const handle, const __tcoap_request_descriptor * const dr)
+tcoap_error tcoap_send_coap_request(tcoap_handle * const handle, const tcoap_request_descriptor * const reqd)
 {
-    __tcoap_error err;
+    tcoap_error err;
 
     /* check state */
     if (TCOAP_CHECK_STATUS(handle, TCOAP_SENDING_PACKET)) {
@@ -44,17 +48,17 @@ __tcoap_error tcoap_send_coap_request(__tcoap_handle * const handle, const __tco
     }
 
     TCOAP_SET_STATUS(handle, TCOAP_SENDING_PACKET);
-    err = init_coap_driver(handle, dr);
+    err = init_coap_driver(handle, reqd);
 
     if (err == TCOAP_OK) {
 
         switch (handle->transport) {
             case TCOAP_UDP:
-                err = tcoap_send_coap_request_udp(handle, dr);
+                err = tcoap_send_coap_request_udp(handle, reqd);
                 break;
 
             case TCOAP_TCP:
-                err = tcoap_send_coap_request_tcp(handle, dr);
+                err = tcoap_send_coap_request_tcp(handle, reqd);
                 break;
 
             case TCOAP_SMS:
@@ -78,7 +82,7 @@ __tcoap_error tcoap_send_coap_request(__tcoap_handle * const handle, const __tco
  * @brief See description in the header file.
  *
  */
-__tcoap_error tcoap_rx_byte(__tcoap_handle * const handle, const uint8_t byte)
+tcoap_error tcoap_rx_byte(tcoap_handle * const handle, const uint8_t byte)
 {
     if (TCOAP_CHECK_STATUS(handle, TCOAP_WAITING_RESP)) {
 
@@ -100,11 +104,11 @@ __tcoap_error tcoap_rx_byte(__tcoap_handle * const handle, const uint8_t byte)
  * @brief See description in the header file.
  *
  */
-__tcoap_error tcoap_rx_packet(__tcoap_handle * const handle, const uint8_t * buf, const uint32_t len)
+tcoap_error tcoap_rx_packet(tcoap_handle * const handle, const uint8_t * buf, const uint32_t len)
 {
     if (TCOAP_CHECK_STATUS(handle, TCOAP_WAITING_RESP)) {
 
-        TCOAP_MEM_COPY(handle->response.buf, buf, len < TCOAP_MAX_PDU_SIZE ? len : TCOAP_MAX_PDU_SIZE);
+        mem_copy(handle->response.buf, buf, len < TCOAP_MAX_PDU_SIZE ? len : TCOAP_MAX_PDU_SIZE);
         handle->response.len = len;
 
         if (len < TCOAP_MAX_PDU_SIZE) {
@@ -123,20 +127,20 @@ __tcoap_error tcoap_rx_packet(__tcoap_handle * const handle, const uint8_t * buf
  * @brief Init CoAP driver
  *
  * @param handle - coap handle
- * @param dr - descriptor of request
+ * @param reqd - descriptor of request
  *
  * @return status of operation
  */
-static __tcoap_error init_coap_driver(__tcoap_handle * const handle, const __tcoap_request_descriptor * const dr)
+static tcoap_error init_coap_driver(tcoap_handle * const handle, const tcoap_request_descriptor * const reqd)
 {
-    __tcoap_error err;
+    tcoap_error err;
 
     err = TCOAP_OK;
 
     handle->request.len = 0;
     handle->response.len = 0;
 
-    if (dr->code == TCOAP_CODE_EMPTY_MSG && dr->tkl) {
+    if (reqd->code == TCOAP_CODE_EMPTY_MSG && reqd->tkl) {
         return TCOAP_PARAM_ERROR;
     }
 
@@ -148,7 +152,7 @@ static __tcoap_error init_coap_driver(__tcoap_handle * const handle, const __tco
         }
     }
 
-    if (dr->type == TCOAP_MESSAGE_CON || dr->response_callback != NULL) {
+    if (reqd->type == TCOAP_MESSAGE_CON || reqd->response_callback != NULL) {
         if (handle->response.buf == NULL) {
             err = tcoap_alloc_mem_block(&handle->response.buf, TCOAP_MAX_PDU_SIZE);
         }
@@ -164,7 +168,7 @@ static __tcoap_error init_coap_driver(__tcoap_handle * const handle, const __tco
  * @param handle - coap handle
  *
  */
-static void deinit_coap_driver(__tcoap_handle *handle)
+static void deinit_coap_driver(tcoap_handle *handle)
 {
     if (handle->response.buf != NULL) {
         tcoap_free_mem_block(handle->response.buf, TCOAP_MAX_PDU_SIZE);

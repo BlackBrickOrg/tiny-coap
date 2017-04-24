@@ -1,7 +1,11 @@
 /**
+ * tcoap_utils.c
+ *
  * Author: Serge Maslyakov, rusoil.9@gmail.com
+ * Copyright 2017 Serge Maslyakov. All rights reserved.
  *
  */
+
 
 
 #include "tcoap_utils.h"
@@ -22,7 +26,7 @@
  * @brief See description in the header file.
  *
  */
-uint32_t encoding_options(uint8_t * const buf, const __tcoap_option_data *options)
+uint32_t encoding_options(uint8_t * const buf, const tcoap_option_data *options)
 {
     uint32_t idx;
     uint32_t local_idx;
@@ -70,7 +74,7 @@ uint32_t encoding_options(uint8_t * const buf, const __tcoap_option_data *option
         }
 
         /* value */
-        TCOAP_MEM_COPY(buf + idx, options->value, options->len);
+        mem_copy(buf + idx, options->value, options->len);
         idx += options->len;
 
         options = options->next;
@@ -86,11 +90,11 @@ uint32_t encoding_options(uint8_t * const buf, const __tcoap_option_data *option
  * @brief See description in the header file.
  *
  */
-__tcoap_error
-decoding_options(const __tcoap_data * const response, __tcoap_option_data * options,
+tcoap_error
+decoding_options(const tcoap_data * const response, tcoap_option_data * options,
         const uint32_t const opt_start_idx, uint32_t * const payload_start_idx)
 {
-    __tcoap_error err;
+    tcoap_error err;
     uint32_t idx;
 
     uint8_t opt;
@@ -188,11 +192,11 @@ return_label:
  * @brief See description in the header file.
  *
  */
-uint32_t fill_payload(uint8_t * const buf, const __tcoap_data * const payload)
+uint32_t fill_payload(uint8_t * const buf, const tcoap_data * const payload)
 {
     *buf = TCOAP_PAYLOAD_PREFIX;
 
-    TCOAP_MEM_COPY(buf + 1, payload->buf, payload->len);
+    mem_copy(buf + 1, payload->buf, payload->len);
 
     return payload->len + 1;
 }

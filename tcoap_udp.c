@@ -1,5 +1,8 @@
 /**
+ * tcoap_udp.c
+ *
  * Author: Serge Maslyakov, rusoil.9@gmail.com
+ * Copyright 2017 Serge Maslyakov. All rights reserved.
  *
  */
 
@@ -24,14 +27,14 @@ typedef struct {
                                  code (value 40-255) */
     uint16_t mid;             /* transaction id (network byte order!) */
 
-} __tcoap_udp_header;
+} tcoap_udp_header;
 
 
 
-static void asemble_request(__tcoap_handle * const handle, __tcoap_data * const request, const __tcoap_request_descriptor * const dr);
-static uint32_t parse_response(const __tcoap_data * const request, const __tcoap_data * const response);
-static void asemble_ack(__tcoap_data * const ack, const __tcoap_data * const response);
-static __tcoap_error waiting_ack(__tcoap_handle * const handle, const __tcoap_data * const request);
+static void asemble_request(tcoap_handle * const handle, tcoap_data * const request, const tcoap_request_descriptor * const reqd);
+static uint32_t parse_response(const tcoap_data * const request, const tcoap_data * const response);
+static void asemble_ack(tcoap_data * const ack, const tcoap_data * const response);
+static tcoap_error waiting_ack(tcoap_handle * const handle, const tcoap_data * const request);
 
 
 
@@ -39,14 +42,14 @@ static __tcoap_error waiting_ack(__tcoap_handle * const handle, const __tcoap_da
  * @brief See description in the header file.
  *
  */
-__tcoap_error tcoap_send_coap_request_udp(__tcoap_handle * const handle, const __tcoap_request_descriptor * const dr)
+tcoap_error tcoap_send_coap_request_udp(tcoap_handle * const handle, const tcoap_request_descriptor * const reqd)
 {
-    __tcoap_error err;
+    tcoap_error err;
     uint32_t resp_mask;
-    __tcoap_result_data result;
+    tcoap_result_data result;
 
     /* assembling packet */
-    asemble_request(handle, &handle->request, dr);
+    asemble_request(handle, &handle->request, reqd);
 
     /* debug support */
     if (TCOAP_CHECK_STATUS(handle, TCOAP_DEBUG_ON)) {
@@ -64,7 +67,7 @@ __tcoap_error tcoap_send_coap_request_udp(__tcoap_handle * const handle, const _
 
     /* waiting ack if needed */
     resp_mask = TCOAP_RESP_EMPTY;
-    if (dr->type == TCOAP_MESSAGE_CON) {
+    if (reqd->type == TCOAP_MESSAGE_CON) {
 
         TCOAP_SET_STATUS(handle, TCOAP_WAITING_RESP);
 
@@ -104,9 +107,9 @@ __tcoap_error tcoap_send_coap_request_udp(__tcoap_handle * const handle, const _
     }
 
     /* waiting response if needed */
-    if (dr->response_callback != NULL) {
+    if (reqd->response_callback != NULL) {
 
-        if (dr->type != TCOAP_MESSAGE_CON || !TCOAP_CHECK_RESP(resp_mask, TCOAP_RESP_PIGGYBACKED)) {
+        if (reqd->type != TCOAP_MESSAGE_CON || !TCOAP_CHECK_RESP(resp_mask, TCOAP_RESP_PIGGYBACKED)) {
 
             handle->response.len = 0;
             TCOAP_SET_STATUS(handle, TCOAP_WAITING_RESP);
@@ -146,7 +149,7 @@ __tcoap_error tcoap_send_coap_request_udp(__tcoap_handle * const handle, const _
          * outgoing packet is not needed already. It allows us to save ram-memory.
          */
         err = decoding_options(&handle->response,
-                (__tcoap_option_data *)handle->request.buf,
+                (tcoap_option_data *)handle->request.buf,
                 ((handle->response.buf[0] & 0x0F) + 4),
                 &handle->request.len);
 
@@ -164,9 +167,9 @@ __tcoap_error tcoap_send_coap_request_udp(__tcoap_handle * const handle, const _
         }
 
         result.resp_code = TCOAP_RESPONSE_CODE(handle->response.buf);
-        result.options = err == TCOAP_NO_OPTIONS_ERROR ? NULL : (__tcoap_option_data *)handle->request.buf;
+        result.options = err == TCOAP_NO_OPTIONS_ERROR ? NULL : (tcoap_option_data *)handle->request.buf;
 
-        dr->response_callback(dr, &result);
+        reqd->response_callback(reqd, &result);
 
         /* debug support */
         if (TCOAP_CHECK_STATUS(handle, TCOAP_DEBUG_ON)) {
@@ -193,40 +196,40 @@ __tcoap_error tcoap_send_coap_request_udp(__tcoap_handle * const handle, const _
  *
  * @param handle - coap handle
  * @param request - data struct for storing request
- * @param dr - descriptor of request
+ * @param reqd - descriptor of request
  *
  */
-static void asemble_request(__tcoap_handle * const handle, __tcoap_data * const request, const __tcoap_request_descriptor * const dr)
+static void asemble_request(tcoap_handle * const handle, tcoap_data * const request, const tcoap_request_descriptor * const reqd)
 {
-    __tcoap_udp_header header;
+    tcoap_udp_header header;
 
-    request->len = sizeof(__tcoap_udp_header);
+    request->len = sizeof(tcoap_udp_header);
 
     /* assemble header */
     header.vers = TCOAP_DEFAULT_VERSION;
-    header.type = dr->type;
-    header.code = dr->code;
-    header.tkl = dr->tkl;
+    header.type = reqd->type;
+    header.code = reqd->code;
+    header.tkl = reqd->tkl;
     header.mid = tcoap_get_message_id(handle);
 
     /* assemble token */
-    if (dr->tkl) {
-        tcoap_fill_token(handle, request->buf + request->len, dr->tkl);
-        request->len += dr->tkl;
+    if (reqd->tkl) {
+        tcoap_fill_token(handle, request->buf + request->len, reqd->tkl);
+        request->len += reqd->tkl;
     }
 
     /* assemble options */
-    if (dr->options != NULL) {
-        request->len += encoding_options(request->buf + request->len, dr->options);
+    if (reqd->options != NULL) {
+        request->len += encoding_options(request->buf + request->len, reqd->options);
     }
 
     /* assemble payload */
-    if (dr->payload.len) {
-        request->len += fill_payload(request->buf + request->len, &dr->payload);
+    if (reqd->payload.len) {
+        request->len += fill_payload(request->buf + request->len, &reqd->payload);
     }
 
     /* copy header */
-    TCOAP_MEM_COPY(request->buf, &header, sizeof(__tcoap_udp_header));
+    mem_copy(request->buf, &header, sizeof(tcoap_udp_header));
 }
 
 
@@ -236,9 +239,9 @@ static void asemble_request(__tcoap_handle * const handle, __tcoap_data * const 
  * @param request - pointer on outgoing packet data
  * @param response - pointer on incoming packet data
  *
- * @return bit mask of results parsing (see __tcoap_parsing_result_t)
+ * @return bit mask of results parsing, see 'tcoap_parsing_result_t'
  */
-static uint32_t parse_response(const __tcoap_data * const request, const __tcoap_data * const response)
+static uint32_t parse_response(const tcoap_data * const request, const tcoap_data * const response)
 {
     /**
      * 4.2.  Messages Transmitted Reliably
@@ -250,16 +253,16 @@ static uint32_t parse_response(const __tcoap_data * const request, const __tcoap
      * ID of the Confirmable message and MUST be Empty.
      */
 
-    __tcoap_udp_header resp_header;
-    __tcoap_udp_header req_header;
+    tcoap_udp_header resp_header;
+    tcoap_udp_header req_header;
     uint32_t resp_mask;
 
     /* check on header */
     if (response->len > 3) {
 
         resp_mask = TCOAP_RESP_EMPTY;
-        TCOAP_MEM_COPY(&resp_header, response->buf, sizeof(__tcoap_udp_header));
-        TCOAP_MEM_COPY(&req_header, request->buf, sizeof(__tcoap_udp_header));
+        mem_copy(&resp_header, response->buf, sizeof(tcoap_udp_header));
+        mem_copy(&req_header, request->buf, sizeof(tcoap_udp_header));
 
         /* do fast checking */
         if (resp_header.vers != req_header.vers) {
@@ -326,7 +329,7 @@ static uint32_t parse_response(const __tcoap_data * const request, const __tcoap
         }
 
         /* check tokens */
-        if (!TCOAP_MEM_CMP(response->buf + 4, request->buf + 4, resp_header.tkl)) {
+        if (!mem_cmp(response->buf + 4, request->buf + 4, resp_header.tkl)) {
             goto return_err_label;
         }
 
@@ -362,12 +365,12 @@ return_err_label:
  * @param ack - data where was stored ACK packet
  * @param response - the response on the basis of which will be assemble ACK packet
  */
-static void asemble_ack(__tcoap_data * const ack, const __tcoap_data * const response)
+static void asemble_ack(tcoap_data * const ack, const tcoap_data * const response)
 {
-    __tcoap_udp_header ack_header;
+    tcoap_udp_header ack_header;
 
     /* get header from incoming packet */
-    TCOAP_MEM_COPY(&ack_header, response, sizeof(__tcoap_udp_header));
+    mem_copy(&ack_header, response, sizeof(tcoap_udp_header));
 
     /* assemble header */
     ack_header.type = TCOAP_MESSAGE_ACK;
@@ -375,8 +378,8 @@ static void asemble_ack(__tcoap_data * const ack, const __tcoap_data * const res
     ack_header.tkl = 0;
 
     /* copy header */
-    TCOAP_MEM_COPY(ack->buf, &ack_header, sizeof(__tcoap_udp_header));
-    ack->len = sizeof(__tcoap_udp_header);
+    mem_copy(ack->buf, &ack_header, sizeof(tcoap_udp_header));
+    ack->len = sizeof(tcoap_udp_header);
 }
 
 
@@ -389,9 +392,9 @@ static void asemble_ack(__tcoap_data * const ack, const __tcoap_data * const res
  *
  * @return result of operation
  */
-static __tcoap_error waiting_ack(__tcoap_handle * const handle, const __tcoap_data * const request)
+static tcoap_error waiting_ack(tcoap_handle * const handle, const tcoap_data * const request)
 {
-    __tcoap_error err;
+    tcoap_error err;
     uint32_t retransmition;
 
     retransmition = 0;

@@ -1,26 +1,21 @@
 /**
+ * tcoap.h
+ *
  * Author: Serge Maslyakov, rusoil.9@gmail.com
+ * Copyright 2017 Serge Maslyakov. All rights reserved.
+ *
  *
  * Acknowledgement:
  *
- * 1) libcoap       https://github.com/obgm/libcoap
- * 2) lobaro-coap   https://github.com/Lobaro/lobaro-coap
- * 3) californium   https://github.com/eclipse/californium
+ * 1) californium   https://github.com/eclipse/californium
  *
- * Aims:
- *
- * Implementation of CoAP for mcu with ram 1-4 kB via GSM/NB-IoT.
- * Assumed that device is client and it initializes data exchange with server.
- *
- * 1. Assemble a packet by provided user data
- * 2. Parse an incoming packet and invoking callbacks to user code
+ * Aims: Implementation of client CoAP for mcu with ram 1-4 kB via GSM/NB-IoT.
  *
  */
 
 
 #ifndef __TCOAP_H
 #define __TCOAP_H
-
 
 
 #include <stdint.h>
@@ -38,16 +33,14 @@
 
 #define TCOAP_TCP_URI_SCHEME            "coap+tcp"
 #define TCOAP_TCP_SECURE_URI_SCHEME     "coaps+tcp"
-
-#define TCOAP_TCP_DEFAULT_PORT          5683
-#define TCOAP_TCP_DEFAULT_SECURE_PORT   5684
-
-
 #define TCOAP_UDP_URI_SCHEME            "coap"
 #define TCOAP_UDP_SECURE_URI_SCHEME     "coaps"
 
+#define TCOAP_TCP_DEFAULT_PORT          5683
+#define TCOAP_TCP_DEFAULT_SECURE_PORT   5684
 #define TCOAP_UDP_DEFAULT_PORT          5683
 #define TCOAP_UDP_DEFAULT_SECURE_PORT   5684
+
 
 #ifndef TCOAP_RESP_TIMEOUT_MS
 #define TCOAP_RESP_TIMEOUT_MS           9000
@@ -69,13 +62,6 @@
 #define TCOAP_MAX_PDU_SIZE              96        /* maximum size of a CoAP PDU */
 #endif /* TCOAP_MAX_PDU_SIZE */
 
-#ifndef TCOAP_MEM_COPY
-#define TCOAP_MEM_COPY(dst,src,cnt)     mem_copy((dst),(src),(cnt)) /* void mem_copy(void *dst, const void *src, uint32_t cnt); */
-#endif /* TCOAP_MEM_COPY */
-
-#ifndef TCOAP_MEM_CMP
-#define TCOAP_MEM_CMP(dst,src,cnt)      mem_cmp((dst),(src),(cnt))  /* bool mem_cmp(void *dst, const void *src, uint32_t cnt); */
-#endif /* TCOAP_MEM_CMP */
 
 
 typedef enum {
@@ -96,7 +82,7 @@ typedef enum {
     TCOAP_NO_OPTIONS_ERROR,
     TCOAP_WRONG_OPTIONS_ERROR
 
-} __tcoap_error;
+} tcoap_error;
 
 
 typedef enum {
@@ -115,7 +101,7 @@ typedef enum {
     TCOAP_RESPONSE_TO_LONG_ERROR,
     TCOAP_RESPONSE_DID_RECEIVE
 
-} __tcoap_out_signal;
+} tcoap_out_signal;
 
 
 typedef enum {
@@ -124,7 +110,7 @@ typedef enum {
     TCOAP_TCP,
     TCOAP_SMS
 
-} __tcoap_transport;
+} tcoap_transport;
 
 
 typedef enum {
@@ -134,7 +120,7 @@ typedef enum {
     TCOAP_MESSAGE_ACK = 2,   /* used to acknowledge confirmable messages */
     TCOAP_MESSAGE_RST = 3    /* indicates error in received messages */
 
-} __tcoap_udp_message;
+} tcoap_udp_message;
 
 
 typedef enum {
@@ -146,7 +132,7 @@ typedef enum {
 
     TCOAP_TCP_SIGNAL_CLASS = 7
 
-} __tcoap_class;
+} tcoap_class;
 
 
 typedef enum {
@@ -190,13 +176,13 @@ typedef enum {
     TCOAP_TCP_SIGNAL_RELEASE_704 = TCOAP_CODE(TCOAP_TCP_SIGNAL_CLASS, 4),
     TCOAP_TCP_SIGNAL_ABORT_705 = TCOAP_CODE(TCOAP_TCP_SIGNAL_CLASS, 5)
 
-} __tcoap_packet_code;
+} tcoap_packet_code;
 
 
 /**
-  * Critical = (optnum & 1)
-  * UnSafe =   (optnum & 2)
-  * NoCacheKey = ((optnum & 0x1e) == 0x1c)
+  * Critical    = (optnum & 1)
+  * UnSafe      = (optnum & 2)
+  * NoCacheKey  = ((optnum & 0x1e) == 0x1c)
   *
  */
 typedef enum {
@@ -222,7 +208,7 @@ typedef enum {
     TCOAP_PROXY_SCHEME_OPT     = 39,
     TCOAP_SIZE1_OPT            = 60
 
-} __tcoap_option;
+} tcoap_option;
 
 
 typedef enum {
@@ -251,68 +237,68 @@ typedef enum {
     TCOAP_APPLICATION_X_OBIX_BINARY = 51,
     TCOAP_APPLICATION_CBOR = 60
 
-} __tcoap_media_type;
+} tcoap_media_type;
 
 
-typedef struct __tcoap_option_data {
+typedef struct tcoap_option_data {
 
     uint16_t num;
     uint16_t len;
     uint8_t * value;   /* may be string/int/long */
 
-    struct __tcoap_option_data * next;
+    struct tcoap_option_data * next;
 
-} __tcoap_option_data;
+} tcoap_option_data;
 
 
-typedef struct __tcoap_data {
+typedef struct tcoap_data {
 
     uint8_t * buf;
     uint32_t len;
 
-} __tcoap_data;
+} tcoap_data;
 
 
-typedef struct __tcoap_result_data {
+typedef struct tcoap_result_data {
 
     uint8_t resp_code;
-    __tcoap_data payload;
-    __tcoap_option_data * options;   /* NULL terminated linked list of options */
+    tcoap_data payload;
+    tcoap_option_data * options;   /* NULL terminated linked list of options */
 
-} __tcoap_result_data;
+} tcoap_result_data;
 
 
-typedef struct __tcoap_request_descriptor {
+typedef struct tcoap_request_descriptor {
 
     uint8_t type;
     uint8_t code;
     uint16_t tkl;
 
-    __tcoap_data payload;            /* should not be NULL */
-    __tcoap_option_data * options;   /* should be NULL if there are no options */
+    tcoap_data payload;            /* should not be NULL */
+    tcoap_option_data * options;   /* should be NULL if there are no options */
 
     /**
      * @brief Callback with results of request
      *
-     * @param dr - pointer on the request data struct '__tcoap_request_descr'
-     * @param result - pointer on result data struct '__tcoap_result_data'
+     * @param reqd - pointer on the request data struct 'tcoap_request_descriptor'
+     * @param result - pointer on result data struct 'tcoap_result_data'
      */
-    void (* response_callback) (const struct __tcoap_request_descriptor * const dr, const struct __tcoap_result_data * const result);
+    void (* response_callback) (const struct tcoap_request_descriptor * const reqd, const struct tcoap_result_data * const result);
 
-} __tcoap_request_descriptor;
+} tcoap_request_descriptor;
 
 
-typedef struct __tcoap_handle {
+typedef struct tcoap_handle {
 
     const char * name;
     uint16_t transport;
 
     uint16_t statuses_mask;
 
-    __tcoap_data request;
-    __tcoap_data response;
+    tcoap_data request;
+    tcoap_data response;
 
-} __tcoap_handle;
+} tcoap_handle;
 
 
 /**
@@ -320,7 +306,7 @@ typedef struct __tcoap_handle {
  *        hardware interface (e.g. serial port)
  * 
  */
-extern __tcoap_error tcoap_tx_data(__tcoap_handle * const handle, const uint8_t *buf, const uint32_t len);
+extern tcoap_error tcoap_tx_data(tcoap_handle * const handle, const uint8_t *buf, const uint32_t len);
 
 
 /**
@@ -328,54 +314,68 @@ extern __tcoap_error tcoap_tx_data(__tcoap_handle * const handle, const uint8_t 
  *        This function should returns control when timeout will be expired or 
  *        when response from server will be received.
  */
-extern __tcoap_error tcoap_wait_event(__tcoap_handle * const handle, const uint32_t timeout_ms);
+extern tcoap_error tcoap_wait_event(tcoap_handle * const handle, const uint32_t timeout_ms);
 
 
 /**
  * @brief In this function 'tcoap' lib notify user about events. 
-          See possible events here '__tcoap_out_signal'.
+          See possible events here 'tcoap_out_signal'.
  */
-extern __tcoap_error tcoap_tx_signal(__tcoap_handle * const handle, const __tcoap_out_signal signal);
+extern tcoap_error tcoap_tx_signal(tcoap_handle * const handle, const tcoap_out_signal signal);
 
 
 /**
  * @brief In this function user should implement generating of message id.
  * 
  */
-extern uint16_t tcoap_get_message_id(__tcoap_handle * const handle);
+extern uint16_t tcoap_get_message_id(tcoap_handle * const handle);
 
 
 /**
  * @brief In this function user should implement generating of token.
  * 
  */
-extern __tcoap_error tcoap_fill_token(__tcoap_handle * const handle, uint8_t *token, const uint32_t tkl);
+extern tcoap_error tcoap_fill_token(tcoap_handle * const handle, uint8_t *token, const uint32_t tkl);
 
 
 /**
  * @brief These functions are using for debug purpose, if user will enable debug mode.
  * 
  */
-extern void tcoap_debug_print_packet(__tcoap_handle * const handle, const char * msg, uint8_t *data, const uint32_t len);
-extern void tcoap_debug_print_options(__tcoap_handle * const handle, const char * msg, const __tcoap_option_data * options);
-extern void tcoap_debug_print_payload(__tcoap_handle * const handle, const char * msg, const __tcoap_data * const payload);
+extern void tcoap_debug_print_packet(tcoap_handle * const handle, const char * msg, uint8_t *data, const uint32_t len);
+extern void tcoap_debug_print_options(tcoap_handle * const handle, const char * msg, const tcoap_option_data * options);
+extern void tcoap_debug_print_payload(tcoap_handle * const handle, const char * msg, const tcoap_data * const payload);
 
 
 /**
  * @brief In this function user should implement allocating mem block.
- *        In simple case it may be a static buffer. The 'TCOAP' will make a two calls of this functions
- *        before start (rx and tx buffer).
+ *        In simple case it may be a static buffer. The 'TCOAP' will make a
+ *        two calls of this functions before start (rx and tx buffer).
  *        So you should have a minimum two separate block of memory.
  * 
  */
-extern __tcoap_error tcoap_alloc_mem_block(uint8_t **block, const uint32_t min_len);
+extern tcoap_error tcoap_alloc_mem_block(uint8_t **block, const uint32_t min_len);
 
 
 /**
  * @brief In this function user should implement freeing mem block.
  * 
  */
-extern __tcoap_error tcoap_free_mem_block(uint8_t *block, const uint32_t min_len);
+extern tcoap_error tcoap_free_mem_block(uint8_t *block, const uint32_t min_len);
+
+
+/**
+ * @brief In this function user should implement copying mem block.
+ *
+ */
+extern void mem_copy(void *dst, const void *src, uint32_t cnt);
+
+
+/**
+ * @brief In this function user should implement comparing two mem blocks.
+ *
+ */
+extern bool mem_cmp(const void *dst, const void *src, uint32_t cnt);
 
 
 /**
@@ -383,19 +383,19 @@ extern __tcoap_error tcoap_free_mem_block(uint8_t *block, const uint32_t min_len
  *        Also you should implement 'tcoap_debug_print..' methods in your code.
  *
  */
-void tcoap_debug(__tcoap_handle * const handle, const bool enable);
+void tcoap_debug(tcoap_handle * const handle, const bool enable);
 
 
 /**
  * @brief Send CoAP request to the server
  *
  * @param handle - coap handle
- * @param dr - descriptor of request
+ * @param reqd - descriptor of request
  *
  * @return status of operation
  *
  */
-__tcoap_error tcoap_send_coap_request(__tcoap_handle * const handle, const __tcoap_request_descriptor * const dr);
+tcoap_error tcoap_send_coap_request(tcoap_handle * const handle, const tcoap_request_descriptor * const reqd);
 
 
 /**
@@ -410,7 +410,7 @@ __tcoap_error tcoap_send_coap_request(__tcoap_handle * const handle, const __tco
  * @return status of operation
  *
  */
-__tcoap_error tcoap_rx_byte(__tcoap_handle * const handle, const uint8_t byte);
+tcoap_error tcoap_rx_byte(tcoap_handle * const handle, const uint8_t byte);
 
 
 /**
@@ -423,7 +423,7 @@ __tcoap_error tcoap_rx_byte(__tcoap_handle * const handle, const uint8_t byte);
  * @return status of operation
  *
  */
-__tcoap_error tcoap_rx_packet(__tcoap_handle * const handle, const uint8_t * buf, const uint32_t len);
+tcoap_error tcoap_rx_packet(tcoap_handle * const handle, const uint8_t * buf, const uint32_t len);
 
 
 #endif /* __TCOAP_H */

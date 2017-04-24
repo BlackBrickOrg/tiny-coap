@@ -1,5 +1,8 @@
 /**
+ * tcoap_utils.h
+ *
  * Author: Serge Maslyakov, rusoil.9@gmail.com
+ * Copyright 2017 Serge Maslyakov. All rights reserved.
  *
  */
 
@@ -31,7 +34,7 @@ typedef enum {
 
      TCOAP_DEBUG_ON        = (int) 0x0080
 
-} __tcoap_handle_status;
+} tcoap_handle_status;
 
 
 typedef enum {
@@ -51,7 +54,7 @@ typedef enum {
 
     TCOAP_RESP_INVALID_PACKET   = (int) 0x80000000
 
-} __tcoap_parsing_result;
+} tcoap_parsing_result;
 
 
 
@@ -63,7 +66,7 @@ typedef enum {
  *
  * @return length of data that was added to the buffer
  */
-uint32_t encoding_options(uint8_t * const buf, const __tcoap_option_data *option);
+uint32_t encoding_options(uint8_t * const buf, const tcoap_option_data *option);
 
 
 /**
@@ -76,8 +79,8 @@ uint32_t encoding_options(uint8_t * const buf, const __tcoap_option_data *option
  *
  * @return status of operations
  */
-__tcoap_error
-decoding_options(const __tcoap_data * const response, __tcoap_option_data * option,
+tcoap_error
+decoding_options(const tcoap_data * const response, tcoap_option_data * option,
         const uint32_t const opt_start_idx, uint32_t * const payload_start_idx);
 
 
@@ -89,7 +92,7 @@ decoding_options(const __tcoap_data * const response, __tcoap_option_data * opti
  *
  * @return length of data that was added to the buffer
  */
-uint32_t fill_payload(uint8_t * const buf, const __tcoap_data * const payload);
+uint32_t fill_payload(uint8_t * const buf, const tcoap_data * const payload);
 
 
 

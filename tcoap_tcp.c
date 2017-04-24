@@ -1,5 +1,8 @@
 /**
+ * tcoap_tcp.c
+ *
  * Author: Serge Maslyakov, rusoil.9@gmail.com
+ * Copyright 2017 Serge Maslyakov. All rights reserved.
  *
  */
 
@@ -32,23 +35,23 @@ typedef union {
     } fields;
 
     uint8_t byte;
-} __tcoap_tcp_len_header;
+} tcoap_tcp_len_header;
 
 
 typedef struct {
 
-    __tcoap_tcp_len_header len_header;
+    tcoap_tcp_len_header len_header;
 
     uint8_t code;
     uint32_t data_len;
 
-} __tcoap_tcp_header;
+} tcoap_tcp_header;
 
 
 
-static void asemble_request(__tcoap_handle * const handle, __tcoap_data * const request, const __tcoap_request_descriptor * const dr);
-static uint32_t parse_response(const __tcoap_data * const request, const __tcoap_data * const response, uint32_t * const options_shift);
-static uint32_t extract_payload_length(__tcoap_tcp_header * const header, const uint8_t * const buf);
+static void asemble_request(tcoap_handle * const handle, tcoap_data * const request, const tcoap_request_descriptor * const reqd);
+static uint32_t parse_response(const tcoap_data * const request, const tcoap_data * const response, uint32_t * const options_shift);
+static uint32_t extract_payload_length(tcoap_tcp_header * const header, const uint8_t * const buf);
 static void shift_data(uint8_t * dst, const uint8_t *src, uint32_t len);
 
 
@@ -57,15 +60,15 @@ static void shift_data(uint8_t * dst, const uint8_t *src, uint32_t len);
  * @brief See description in the header file.
  *
  */
-__tcoap_error tcoap_send_coap_request_tcp(__tcoap_handle * const handle, const __tcoap_request_descriptor * const dr)
+tcoap_error tcoap_send_coap_request_tcp(tcoap_handle * const handle, const tcoap_request_descriptor * const reqd)
 {
-    __tcoap_error err;
+    tcoap_error err;
     uint32_t resp_mask;
     uint32_t option_start_idx;
-    __tcoap_result_data result;
+    tcoap_result_data result;
 
     /* assembling packet */
-    asemble_request(handle, &handle->request, dr);
+    asemble_request(handle, &handle->request, reqd);
 
     /* debug support */
     if (TCOAP_CHECK_STATUS(handle, TCOAP_DEBUG_ON)) {
@@ -83,7 +86,7 @@ __tcoap_error tcoap_send_coap_request_tcp(__tcoap_handle * const handle, const _
 
     /* waiting response if needed */
     resp_mask = TCOAP_RESP_EMPTY;
-    if (dr->response_callback != NULL) {
+    if (reqd->response_callback != NULL) {
 
         handle->response.len = 0;
         TCOAP_SET_STATUS(handle, TCOAP_WAITING_RESP);
@@ -123,7 +126,7 @@ __tcoap_error tcoap_send_coap_request_tcp(__tcoap_handle * const handle, const _
          * outgoing packet is not needed already. It allows us to save ram-memory.
          */
         err = decoding_options(&handle->response,
-                (__tcoap_option_data *)handle->request.buf,
+                (tcoap_option_data *)handle->request.buf,
                 option_start_idx,
                 &handle->request.len);
 
@@ -142,9 +145,9 @@ __tcoap_error tcoap_send_coap_request_tcp(__tcoap_handle * const handle, const _
 
         /* response_code_idx = option_start_idx - (handle->response.buf[0] & 0x0f) - 1 */
         result.resp_code = handle->response.buf[option_start_idx - (handle->response.buf[0] & 0x0f) - 1];
-        result.options = err == TCOAP_NO_OPTIONS_ERROR ? NULL : (__tcoap_option_data *)handle->request.buf;
+        result.options = err == TCOAP_NO_OPTIONS_ERROR ? NULL : (tcoap_option_data *)handle->request.buf;
 
-        dr->response_callback(dr, &result);
+        reqd->response_callback(reqd, &result);
 
         /* debug support */
         if (TCOAP_CHECK_STATUS(handle, TCOAP_DEBUG_ON)) {
@@ -162,14 +165,14 @@ __tcoap_error tcoap_send_coap_request_tcp(__tcoap_handle * const handle, const _
  *
  * @param handle - coap handle
  * @param request - data struct for storing request
- * @param dr - descriptor of request
+ * @param reqd - descriptor of request
  *
  */
-static void asemble_request(__tcoap_handle * const handle, __tcoap_data * const request, const __tcoap_request_descriptor * const dr)
+static void asemble_request(tcoap_handle * const handle, tcoap_data * const request, const tcoap_request_descriptor * const reqd)
 {
     uint32_t options_shift;
     uint32_t options_len;
-    __tcoap_tcp_len_header header;
+    tcoap_tcp_len_header header;
 
 /**
   * CoAP over TCP has a header with variable length. Therefore we should calculate
@@ -179,31 +182,31 @@ static void asemble_request(__tcoap_handle * const handle, __tcoap_data * const 
   *
   */
     options_len = 0;
-    options_shift = TCOAP_MIN_TCP_HEADER_LEN + dr->tkl;
+    options_shift = TCOAP_MIN_TCP_HEADER_LEN + reqd->tkl;
 
-    if (dr->payload.len > 10) {
+    if (reqd->payload.len > 10) {
         options_shift += 1;
     }
 
     /* assemble options */
-    if (dr->options != NULL) {
-        options_len += encoding_options(request->buf + options_shift, dr->options);
+    if (reqd->options != NULL) {
+        options_len += encoding_options(request->buf + options_shift, reqd->options);
     }
 
     /* assemble header */
-    request->len = options_len + (dr->payload.len ? dr->payload.len + 1 : 0);
-    header.fields.tkl = dr->tkl;
+    request->len = options_len + (reqd->payload.len ? reqd->payload.len + 1 : 0);
+    header.fields.tkl = reqd->tkl;
 
     if (request->len < TCOAP_TCP_LEN_MIN) {
 
         header.fields.len = request->len;
 
         request->buf[0] = header.byte;
-        request->buf[1] = dr->code;
+        request->buf[1] = reqd->code;
 
         /* check on shift data */
-        if (options_shift > (TCOAP_MIN_TCP_HEADER_LEN + dr->tkl)) {
-            shift_data(request->buf + dr->tkl + TCOAP_MIN_TCP_HEADER_LEN, request->buf + options_shift, options_len);
+        if (options_shift > (TCOAP_MIN_TCP_HEADER_LEN + reqd->tkl)) {
+            shift_data(request->buf + reqd->tkl + TCOAP_MIN_TCP_HEADER_LEN, request->buf + options_shift, options_len);
         }
 
         request->len = 2;
@@ -216,18 +219,18 @@ static void asemble_request(__tcoap_handle * const handle, __tcoap_data * const 
         request->buf[1] = request->len - TCOAP_TCP_LEN_MIN;
 
         /* check on shift data */
-        if (options_shift > dr->tkl + TCOAP_MIN_TCP_HEADER_LEN + 1) {
+        if (options_shift > reqd->tkl + TCOAP_MIN_TCP_HEADER_LEN + 1) {
 
-            shift_data(request->buf + dr->tkl + TCOAP_MIN_TCP_HEADER_LEN + 1,
+            shift_data(request->buf + reqd->tkl + TCOAP_MIN_TCP_HEADER_LEN + 1,
                     request->buf + options_shift, options_len);
 
-        } else if (options_shift < dr->tkl + TCOAP_MIN_TCP_HEADER_LEN + 1) {
+        } else if (options_shift < reqd->tkl + TCOAP_MIN_TCP_HEADER_LEN + 1) {
 
-            shift_data(request->buf + options_len + dr->tkl + TCOAP_MIN_TCP_HEADER_LEN,
+            shift_data(request->buf + options_len + reqd->tkl + TCOAP_MIN_TCP_HEADER_LEN,
                     request->buf + options_shift + options_len - 1, options_len);
         }
 
-        request->buf[2] = dr->code;
+        request->buf[2] = reqd->code;
         request->len = 3;
 
     } else if (request->len < TCOAP_TCP_LEN_MAX) {
@@ -236,20 +239,20 @@ static void asemble_request(__tcoap_handle * const handle, __tcoap_data * const 
         request->buf[0] = header.byte;
 
         /* check on shift data */
-        if (options_shift > dr->tkl + TCOAP_MIN_TCP_HEADER_LEN + 2) {
+        if (options_shift > reqd->tkl + TCOAP_MIN_TCP_HEADER_LEN + 2) {
 
-            shift_data(request->buf + dr->tkl + TCOAP_MIN_TCP_HEADER_LEN + 2,
+            shift_data(request->buf + reqd->tkl + TCOAP_MIN_TCP_HEADER_LEN + 2,
                     request->buf + options_shift, options_len);
 
-        } else if (options_shift < dr->tkl + TCOAP_MIN_TCP_HEADER_LEN + 2) {
+        } else if (options_shift < reqd->tkl + TCOAP_MIN_TCP_HEADER_LEN + 2) {
 
-            shift_data(request->buf + options_len + dr->tkl + TCOAP_MIN_TCP_HEADER_LEN + 1,
+            shift_data(request->buf + options_len + reqd->tkl + TCOAP_MIN_TCP_HEADER_LEN + 1,
                     request->buf + options_shift + options_len - 1, options_len);
         }
 
         request->buf[1] = (request->len - TCOAP_TCP_LEN_MED) >> 8;
         request->buf[2] = (request->len - TCOAP_TCP_LEN_MED);
-        request->buf[3] = dr->code;
+        request->buf[3] = reqd->code;
         request->len = 4;
 
     } else {
@@ -258,14 +261,14 @@ static void asemble_request(__tcoap_handle * const handle, __tcoap_data * const 
         request->buf[0] = header.byte;
 
         /* check on shift data */
-        if (options_shift > dr->tkl + TCOAP_MIN_TCP_HEADER_LEN + 4) {
+        if (options_shift > reqd->tkl + TCOAP_MIN_TCP_HEADER_LEN + 4) {
 
-            shift_data(request->buf + dr->tkl + TCOAP_MIN_TCP_HEADER_LEN + 1,
+            shift_data(request->buf + reqd->tkl + TCOAP_MIN_TCP_HEADER_LEN + 1,
                     request->buf + options_shift, options_len);
 
-        } else if (options_shift < dr->tkl + TCOAP_MIN_TCP_HEADER_LEN + 4) {
+        } else if (options_shift < reqd->tkl + TCOAP_MIN_TCP_HEADER_LEN + 4) {
 
-            shift_data(request->buf + options_len + dr->tkl + TCOAP_MIN_TCP_HEADER_LEN + 3,
+            shift_data(request->buf + options_len + reqd->tkl + TCOAP_MIN_TCP_HEADER_LEN + 3,
                     request->buf + options_shift + options_len - 1, options_len);
         }
 
@@ -273,21 +276,21 @@ static void asemble_request(__tcoap_handle * const handle, __tcoap_data * const 
         request->buf[2] = (request->len - TCOAP_TCP_LEN_MAX) >> 16;
         request->buf[3] = (request->len - TCOAP_TCP_LEN_MAX) >> 8;
         request->buf[4] = (request->len - TCOAP_TCP_LEN_MAX);
-        request->buf[5] = dr->code;
+        request->buf[5] = reqd->code;
         request->len = 6;
     }
 
     /* assemble token */
-    if (dr->tkl) {
-        tcoap_fill_token(handle, request->buf + request->len, dr->tkl);
-        request->len += dr->tkl;
+    if (reqd->tkl) {
+        tcoap_fill_token(handle, request->buf + request->len, reqd->tkl);
+        request->len += reqd->tkl;
     }
 
     request->len += options_len;
 
     /* assemble payload */
-    if (dr->payload.len) {
-        request->len += fill_payload(request->buf + request->len, &dr->payload);
+    if (reqd->payload.len) {
+        request->len += fill_payload(request->buf + request->len, &reqd->payload);
     }
 }
 
@@ -299,12 +302,12 @@ static void asemble_request(__tcoap_handle * const handle, __tcoap_data * const 
  * @param response - pointer on incoming packet
  * @param options_shift - in this variable will be stored start of options index
  *
- * @return bit mask of parsing results (see __tcoap_parsing_result)
+ * @return bit mask of parsing results, see 'tcoap_parsing_result'
  */
-static uint32_t parse_response(const __tcoap_data * const request, const __tcoap_data * const response, uint32_t * const options_shift)
+static uint32_t parse_response(const tcoap_data * const request, const tcoap_data * const response, uint32_t * const options_shift)
 {
-    __tcoap_tcp_header resp_header;
-    __tcoap_tcp_header req_header;
+    tcoap_tcp_header resp_header;
+    tcoap_tcp_header req_header;
 
     uint32_t resp_mask;
     uint32_t resp_idx;
@@ -345,7 +348,7 @@ static uint32_t parse_response(const __tcoap_data * const request, const __tcoap
 
         /* check token */
         if (resp_header.len_header.fields.tkl) {
-            if (!TCOAP_MEM_CMP(response->buf + resp_idx, request->buf + req_idx + 1, resp_header.len_header.fields.tkl)) {
+            if (!mem_cmp(response->buf + resp_idx, request->buf + req_idx + 1, resp_header.len_header.fields.tkl)) {
                 goto return_err_label;
             }
         }
@@ -376,12 +379,12 @@ return_err_label:
 /**
  * @brief Extract length of data from header for TCP packet
  *
- * @param header - pointer on __tcoap_tcp_header
+ * @param header - pointer on 'tcoap_tcp_header'
  * @param buf - pointer on packet buffer
  *
  * @return shift for length
  */
-static uint32_t extract_payload_length(__tcoap_tcp_header * const header, const uint8_t * const buf)
+static uint32_t extract_payload_length(tcoap_tcp_header * const header, const uint8_t * const buf)
 {
     uint32_t idx;
 
