@@ -54,27 +54,62 @@ void eth_rx_irq_handler(uint8_t * data, uint32_t len)
 ```
 
 
-4) Define and store request parameters in the `tcoap_request_descriptor`.
-
-```
- - type
- - code
- - tkl
- - payload
- - options
- - callback for response
+4) Send a coap request and get back response data in the provided callback:
 
 ```
 
-5) Send a coap request and get back response data in the provided callback:
+static void data_resource_response_callback(const struct tcoap_request_descriptor * const reqd, const tcoap_result_data * const result)
+{
+    // ... check response
+}
 
-```
-tcoap_error err;
-tcoap_request_descriptor coap_request;
 
-// fill the `coap_request`
-...
+void send_request_to_data_resource(uint32_t *token_etag, uint8_t * data, uint32_t len)
+{
+    tcoap_error err;
+    tcoap_request_descriptor data_request;
 
-err = tcoap_send_coap_request(&tc_handle, &tcoap_request);
+    tcoap_option_data opt_etag;
+    tcoap_option_data opt_path;
+    tcoap_option_data opt_content;
+
+    /* fill options - we should adhere an order of options */
+    opt_content.num = TCOAP_CONTENT_FORMAT_OPT;
+    opt_content.value = (uint8_t *)"\x2A";  /* 42 = TCOAP_APPLICATION_OCTET_STREAM */
+    opt_content.len = 1;
+    opt_content.next = NULL;
+
+    opt_path.num = TCOAP_URI_PATH_OPT;
+    opt_path.value = (uint8_t *)"data";
+    opt_path.len = 4;
+    opt_path.next = &opt_content;
+
+    opt_etag.num = TCOAP_ETAG_OPT;
+    opt_etag.value = (uint8_t *)token_etag;
+    opt_etag.len = 4;
+    opt_etag.next = &opt_path;
+
+    /* fill the request descriptor */
+    data_request.payload.buf = data;
+    data_request.payload.len = len;
+
+    data_request.code = TCOAP_REQ_POST;
+    data_request.tkl = 2;
+    data_request.type = tc_handle.transport == TCOAP_UDP ? TCOAP_MESSAGE_CON : TCOAP_MESSAGE_NON;
+    data_request.options = &opt_etag;
+    
+    /* define the callback for response data */
+    data_request.response_callback = data_resource_response_callback;
+
+    /* enable debug */
+    tcoap_debug(&tc_handle, true);
+    
+    /* send request */
+    err = tcoap_send_coap_request(&tc_handle, &data_request);
+
+    if (err != TCOAP_OK) {
+        // error handling
+    }
+}
 
 ```
