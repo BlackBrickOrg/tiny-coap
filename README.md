@@ -1,4 +1,4 @@
-### CoAP client library for embedded devices
+### CoAP client library for embedded devices in C
 
 Allows to add the CoAP functionality for embedded device.
 
