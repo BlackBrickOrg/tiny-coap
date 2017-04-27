@@ -201,8 +201,8 @@ typedef enum {
     TCOAP_ACCEPT_OPT           = 17,
     TCOAP_LOCATION_QUERY_OPT   = 20,
     
-    TCOAP_BLOCK2_OPT           = 23,  /* block-wise options */
-    TCOAP_BLOCK1_OPT           = 27,
+    TCOAP_BLOCK2_OPT           = 23,  /* blockwise option for GET */
+    TCOAP_BLOCK1_OPT           = 27,  /* blockwise option for POST */
     
     TCOAP_PROXY_URI_OPT        = 35,
     TCOAP_PROXY_SCHEME_OPT     = 39,

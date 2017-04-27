@@ -79,9 +79,10 @@ uint32_t encoding_options(uint8_t * const buf, const tcoap_option_data *option);
  *
  * @return status of operations
  */
-tcoap_error
-decoding_options(const tcoap_data * const response, tcoap_option_data * option,
-        const uint32_t const opt_start_idx, uint32_t * const payload_start_idx);
+tcoap_error decoding_options(const tcoap_data * const response,
+        tcoap_option_data * option,
+        const uint32_t const opt_start_idx,
+        uint32_t * const payload_start_idx);
 
 
 /**

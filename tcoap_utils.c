@@ -90,9 +90,10 @@ uint32_t encoding_options(uint8_t * const buf, const tcoap_option_data *options)
  * @brief See description in the header file.
  *
  */
-tcoap_error
-decoding_options(const tcoap_data * const response, tcoap_option_data * options,
-        const uint32_t const opt_start_idx, uint32_t * const payload_start_idx)
+tcoap_error decoding_options(const tcoap_data * const response,
+        tcoap_option_data * options,
+        const uint32_t const opt_start_idx,
+        uint32_t * const payload_start_idx)
 {
     tcoap_error err;
     uint32_t idx;
