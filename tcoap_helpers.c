@@ -125,16 +125,16 @@ void tcoap_extract_block2_from_opt(const tcoap_option_data * const block2, tcoap
             break;
 
         case 2:
-            bw->arr[1] = block2->value[0];
-            bw->arr[0] = (block2->value[1] >> 4);
+            bw->arr[1] = (block2->value[0] >> 4);
+            bw->arr[0] = (block2->value[0] << 4) | (block2->value[1] >> 4);
 
             bw->arr[3] = (block2->value[1] & 0x0F);
             break;
 
         case 3:
-            bw->arr[2] = block2->value[0];
-            bw->arr[1] = block2->value[1];
-            bw->arr[0] = (block2->value[2] >> 4);
+            bw->arr[2] = (block2->value[0] >> 4);
+            bw->arr[1] = (block2->value[0] << 4) | (block2->value[1] >> 4);
+            bw->arr[0] = (block2->value[1] << 4) | (block2->value[2] >> 4);
 
             bw->arr[3] = (block2->value[2] & 0x0F);
             break;
