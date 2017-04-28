@@ -42,7 +42,6 @@ uint16_t tcoap_decode_szx_to_size(const uint8_t szx)
         default:
             return TCOPA_BLOCK_SZX_VAL_7;
     }
-
 }
 
 
@@ -52,7 +51,6 @@ uint16_t tcoap_decode_szx_to_size(const uint8_t szx)
  */
 void tcoap_fill_block2_opt(tcoap_option_data * const option, const tcoap_blockwise_data * const bw, uint8_t * const value)
 {
-
 /*
  * Block Option Value
  *
@@ -113,11 +111,12 @@ void tcoap_fill_block2_opt(tcoap_option_data * const option, const tcoap_blockwi
  */
 void tcoap_extract_block2_from_opt(const tcoap_option_data * const block2, tcoap_blockwise_data * const bw)
 {
+    bw->fld.num = 0;
+    bw->fld.block_szx = 0;
+    bw->fld.more = 0;
+
     switch (block2->len) {
         case 0:
-            bw->fld.num= 0;
-            bw->fld.block_szx = 0;
-            bw->fld.more = 0;
             break;
 
         case 1:
@@ -126,8 +125,8 @@ void tcoap_extract_block2_from_opt(const tcoap_option_data * const block2, tcoap
             break;
 
         case 2:
-            bw->arr[0] = block2->value[0];
-            bw->arr[1] = (block2->value[1] >> 4);
+            bw->arr[1] = block2->value[0];
+            bw->arr[0] = (block2->value[1] >> 4);
 
             bw->arr[3] = (block2->value[1] & 0x0F);
             break;
