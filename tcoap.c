@@ -42,7 +42,6 @@ tcoap_error tcoap_send_coap_request(tcoap_handle * const handle, const tcoap_req
 {
     tcoap_error err;
 
-    /* check state */
     if (TCOAP_CHECK_STATUS(handle, TCOAP_SENDING_PACKET)) {
         return TCOAP_BUSY_ERROR;
     }
@@ -136,7 +135,6 @@ static tcoap_error init_coap_driver(tcoap_handle * const handle, const tcoap_req
     tcoap_error err;
 
     err = TCOAP_OK;
-
     handle->request.len = 0;
     handle->response.len = 0;
 
