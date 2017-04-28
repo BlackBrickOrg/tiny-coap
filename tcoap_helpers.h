@@ -35,26 +35,17 @@ typedef enum {
 } tcoap_blockwise_szx;
 
 
-typedef struct tcoap_blockwise_data {
+typedef union tcoap_blockwise_data {
 
     struct {
-        /**
-        * size of block = 2 ^ (szx + 4)
-        * szx from 0 to 6
-        * szx 7 is reserved (should not use it)
-        */
-        uint8_t block_szx   : 3;
+        uint32_t num         : 24;
+        uint32_t block_szx   : 3;
+        uint32_t more        : 1;
+    } fld;
 
-        uint8_t more        : 1;         /* more (not last block) */
-    } opt;
-
-    union {
-        uint8_t num8[4];
-        uint32_t num32;
-    } number;                            /* number of block, from 0 */
+    uint8_t arr[4];
 
 } tcoap_blockwise_data;
-
 
 
 /**
@@ -87,7 +78,6 @@ void tcoap_fill_block2_opt(tcoap_option_data * const option, const tcoap_blockwi
 void tcoap_extract_block2_from_opt(const tcoap_option_data * const block2, tcoap_blockwise_data * const bw);
 
 
-
 /**
  * @brief Find an option by its number
  *
@@ -97,7 +87,6 @@ void tcoap_extract_block2_from_opt(const tcoap_option_data * const block2, tcoap
  * @return pointer to the found option or NULL if option is absent
  */
 const tcoap_option_data * tcoap_find_option_by_number(const tcoap_option_data * options, const uint16_t opt_num);
-
 
 
 #endif /* __TCOAP_HELPERS_H */

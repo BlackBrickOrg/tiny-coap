@@ -81,28 +81,28 @@ void tcoap_fill_block2_opt(tcoap_option_data * const option, const tcoap_blockwi
     option->len = 1;
     option->next = NULL;
 
-    value[0] = (bw->number.num8[0] & 0x0F);
+    value[0] = (bw->arr[0] & 0x0F);
     value[0] <<= 4;
-    value[0] |= bw->opt.block_szx;
-    value[0] |= bw->opt.more ? 8 : 0;
+    value[0] |= bw->fld.block_szx;
+    value[0] |= bw->fld.more ? 8 : 0;
 
-    if (bw->number.num32 > 15) {
+    if (bw->fld.num > 15) {
         option->len = 2;
 
         value[1] = value[0];
 
-        value[0] = (bw->number.num8[0] >> 4);
-        value[0] |= (bw->number.num8[1] & 0x0F);
+        value[0] = (bw->arr[0] >> 4);
+        value[0] |= (bw->arr[1] & 0x0F);
     }
 
-    if (bw->number.num32 > 4095) {
+    if (bw->fld.num > 4095) {
         option->len = 3;
 
         value[2] = value[1];
         value[1] = value[0];
 
-        value[0] = (bw->number.num8[1] >> 4);
-        value[0] |= (bw->number.num8[2] & 0x0F);
+        value[0] = (bw->arr[1] >> 4);
+        value[0] |= (bw->arr[2] & 0x0F);
     }
 }
 
@@ -114,37 +114,30 @@ void tcoap_fill_block2_opt(tcoap_option_data * const option, const tcoap_blockwi
 void tcoap_extract_block2_from_opt(const tcoap_option_data * const block2, tcoap_blockwise_data * const bw)
 {
     switch (block2->len) {
-
         case 0:
-            bw->number.num32 = 0;
-            bw->opt.block_szx = 0;
-            bw->opt.more = 0;
+            bw->fld.num= 0;
+            bw->fld.block_szx = 0;
+            bw->fld.more = 0;
             break;
 
         case 1:
-            bw->number.num32 = (block2->value[0] >> 4);
-            bw->opt.block_szx = (block2->value[0] & 7);
-            bw->opt.more = (block2->value[0] & 8);
+            bw->fld.num = (block2->value[0] >> 4);
+            bw->arr[3] = (block2->value[0] & 0x0F);
             break;
 
         case 2:
-            bw->number.num32 = block2->value[0];
-            bw->number.num32 <<= 8;
-            bw->number.num32 |= (block2->value[1] >> 4);
+            bw->arr[0] = block2->value[0];
+            bw->arr[1] = (block2->value[1] >> 4);
 
-            bw->opt.block_szx = (block2->value[1] & 7);
-            bw->opt.more = (block2->value[1] & 8);
+            bw->arr[3] = (block2->value[1] & 0x0F);
             break;
 
         case 3:
-            bw->number.num32 = block2->value[0];
-            bw->number.num32 <<= 8;
-            bw->number.num32 |= block2->value[1];
-            bw->number.num32 <<= 8;
-            bw->number.num32 |= (block2->value[2] >> 4);
+            bw->arr[2] = block2->value[0];
+            bw->arr[1] = block2->value[1];
+            bw->arr[0] = (block2->value[2] >> 4);
 
-            bw->opt.block_szx = (block2->value[2] & 7);
-            bw->opt.more = (block2->value[2] & 8);
+            bw->arr[3] = (block2->value[2] & 0x0F);
             break;
 
         default:
