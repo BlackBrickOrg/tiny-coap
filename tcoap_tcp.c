@@ -51,7 +51,7 @@ typedef struct {
 
 static void asemble_request(tcoap_handle * const handle, tcoap_data * const request, const tcoap_request_descriptor * const reqd);
 static uint32_t parse_response(const tcoap_data * const request, const tcoap_data * const response, uint32_t * const options_shift);
-static uint32_t extract_payload_length(tcoap_tcp_header * const header, const uint8_t * const buf);
+static uint32_t extract_data_length(tcoap_tcp_header * const header, const uint8_t * const buf);
 static void shift_data(uint8_t * dst, const uint8_t *src, uint32_t len);
 
 
@@ -327,11 +327,11 @@ static uint32_t parse_response(const tcoap_data * const request, const tcoap_dat
             goto return_err_label;
         }
 
-        resp_idx += extract_payload_length(&resp_header, response->buf + resp_idx);
-        req_idx += extract_payload_length(&req_header, request->buf + req_idx);
+        resp_idx += extract_data_length(&resp_header, response->buf + resp_idx);
+        req_idx += extract_data_length(&req_header, request->buf + req_idx);
 
         /* check length */
-        if ((resp_header.data_len + resp_header.len_header.fields.tkl + resp_idx + 1) >= response->len) {
+        if ((resp_header.data_len + resp_header.len_header.fields.tkl + resp_idx + 1) > response->len) {
             goto return_err_label;
         }
 
@@ -377,14 +377,14 @@ return_err_label:
 
 
 /**
- * @brief Extract length of data from header for TCP packet
+ * @brief Extract length of data from header for TCP packet (payload + options)
  *
  * @param header - pointer on 'tcoap_tcp_header'
  * @param buf - pointer on packet buffer
  *
  * @return shift for length
  */
-static uint32_t extract_payload_length(tcoap_tcp_header * const header, const uint8_t * const buf)
+static uint32_t extract_data_length(tcoap_tcp_header * const header, const uint8_t * const buf)
 {
     uint32_t idx;
 
