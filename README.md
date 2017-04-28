@@ -14,6 +14,9 @@ Allows to add the CoAP functionality for embedded device.
 
 - parsing responses. Received data will be return to user via callback.
 
+- helpers for block-wise mode. The block-wise mode is located on higher layer that this implementation.
+  See [wiki](https://github.com/Mozilla9/tiny-coap/wiki/Block-wise-mode-example) for example.
+
 
 #### How to send CoAP request to server
 
