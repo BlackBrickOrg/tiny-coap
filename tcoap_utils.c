@@ -26,7 +26,7 @@
  * @brief See description in the header file.
  *
  */
-uint32_t encoding_options(uint8_t * const buf, const tcoap_option_data *options)
+uint32_t encoding_options(uint8_t * const buf, const tcoap_option_data * options)
 {
     uint32_t idx;
     uint32_t local_idx;
