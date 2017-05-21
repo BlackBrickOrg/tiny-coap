@@ -24,7 +24,7 @@
 
 #ifndef NUUL
 #define NULL ((void *)0)
-#endif
+#endif /* NUUL */
 
 
 #define TCOAP_DEFAULT_VERSION           1
@@ -184,7 +184,7 @@ typedef enum {
   * UnSafe      = (optnum & 2)
   * NoCacheKey  = ((optnum & 0x1e) == 0x1c)
   *
- */
+  */
 typedef enum {
 
     TCOAP_IF_MATCH_OPT         = 1,
@@ -306,7 +306,7 @@ typedef struct tcoap_handle {
  *        hardware interface (e.g. serial port)
  * 
  */
-extern tcoap_error tcoap_tx_data(tcoap_handle * const handle, const uint8_t *buf, const uint32_t len);
+extern tcoap_error tcoap_tx_data(tcoap_handle * const handle, const uint8_t * buf, const uint32_t len);
 
 
 /**
@@ -319,7 +319,7 @@ extern tcoap_error tcoap_wait_event(tcoap_handle * const handle, const uint32_t 
 
 /**
  * @brief In this function 'tcoap' lib notify user about events. 
-          See possible events here 'tcoap_out_signal'.
+ *        See possible events here 'tcoap_out_signal'.
  */
 extern tcoap_error tcoap_tx_signal(tcoap_handle * const handle, const tcoap_out_signal signal);
 
@@ -335,14 +335,14 @@ extern uint16_t tcoap_get_message_id(tcoap_handle * const handle);
  * @brief In this function user should implement generating of token.
  * 
  */
-extern tcoap_error tcoap_fill_token(tcoap_handle * const handle, uint8_t *token, const uint32_t tkl);
+extern tcoap_error tcoap_fill_token(tcoap_handle * const handle, uint8_t * token, const uint32_t tkl);
 
 
 /**
  * @brief These functions are using for debug purpose, if user will enable debug mode.
  * 
  */
-extern void tcoap_debug_print_packet(tcoap_handle * const handle, const char * msg, uint8_t *data, const uint32_t len);
+extern void tcoap_debug_print_packet(tcoap_handle * const handle, const char * msg, uint8_t * data, const uint32_t len);
 extern void tcoap_debug_print_options(tcoap_handle * const handle, const char * msg, const tcoap_option_data * options);
 extern void tcoap_debug_print_payload(tcoap_handle * const handle, const char * msg, const tcoap_data * const payload);
 
@@ -354,28 +354,28 @@ extern void tcoap_debug_print_payload(tcoap_handle * const handle, const char * 
  *        So you should have a minimum two separate block of memory.
  * 
  */
-extern tcoap_error tcoap_alloc_mem_block(uint8_t **block, const uint32_t min_len);
+extern tcoap_error tcoap_alloc_mem_block(uint8_t ** block, const uint32_t min_len);
 
 
 /**
  * @brief In this function user should implement freeing mem block.
  * 
  */
-extern tcoap_error tcoap_free_mem_block(uint8_t *block, const uint32_t min_len);
+extern tcoap_error tcoap_free_mem_block(uint8_t * block, const uint32_t min_len);
 
 
 /**
  * @brief In this function user should implement copying mem block.
  *
  */
-extern void mem_copy(void *dst, const void *src, uint32_t cnt);
+extern void mem_copy(void * dst, const void * src, uint32_t cnt);
 
 
 /**
  * @brief In this function user should implement comparing two mem blocks.
  *
  */
-extern bool mem_cmp(const void *dst, const void *src, uint32_t cnt);
+extern bool mem_cmp(const void * dst, const void * src, uint32_t cnt);
 
 
 /**
