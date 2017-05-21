@@ -66,7 +66,7 @@ typedef enum {
  *
  * @return length of data that was added to the buffer
  */
-uint32_t encoding_options(uint8_t * const buf, const tcoap_option_data *option);
+uint32_t encoding_options(uint8_t * const buf, const tcoap_option_data * option);
 
 
 /**
