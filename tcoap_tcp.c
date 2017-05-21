@@ -52,7 +52,7 @@ typedef struct {
 static void asemble_request(tcoap_handle * const handle, tcoap_data * const request, const tcoap_request_descriptor * const reqd);
 static uint32_t parse_response(const tcoap_data * const request, const tcoap_data * const response, uint32_t * const options_shift);
 static uint32_t extract_data_length(tcoap_tcp_header * const header, const uint8_t * const buf);
-static void shift_data(uint8_t * dst, const uint8_t *src, uint32_t len);
+static void shift_data(uint8_t * dst, const uint8_t * src, uint32_t len);
 
 
 
@@ -429,7 +429,7 @@ static uint32_t extract_data_length(tcoap_tcp_header * const header, const uint8
  * @param src - pointer on current position of data
  * @param len - length of the shift
  */
-static void shift_data(uint8_t * dst, const uint8_t *src, uint32_t len)
+static void shift_data(uint8_t * dst, const uint8_t * src, uint32_t len)
 {
     if (dst < src) {
         while (len--) *dst++ = *src++;
