@@ -16,7 +16,7 @@
 
 
 static tcoap_error init_coap_driver(tcoap_handle * const handle, const tcoap_request_descriptor * const reqd);
-static void deinit_coap_driver(tcoap_handle *handle);
+static void deinit_coap_driver(tcoap_handle * handle);
 
 
 
@@ -166,7 +166,7 @@ static tcoap_error init_coap_driver(tcoap_handle * const handle, const tcoap_req
  * @param handle - coap handle
  *
  */
-static void deinit_coap_driver(tcoap_handle *handle)
+static void deinit_coap_driver(tcoap_handle * handle)
 {
     if (handle->response.buf != NULL) {
         tcoap_free_mem_block(handle->response.buf, TCOAP_MAX_PDU_SIZE);
