@@ -14,6 +14,11 @@
 #include "tcoap.h"
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 /**
  *  UDP CoAP header
  *
@@ -43,5 +48,8 @@
 tcoap_error tcoap_send_coap_request_udp(tcoap_handle * const handle, const tcoap_request_descriptor * const reqd);
 
 
+#ifdef  __cplusplus
+}
+#endif
 
 #endif /* __TCOAP_UDP_H */

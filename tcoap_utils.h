@@ -14,6 +14,11 @@
 #include "tcoap.h"
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 #define TCOAP_CHECK_STATUS(h,s)      ((h)->statuses_mask & (s))
 #define TCOAP_SET_STATUS(h,s)        ((h)->statuses_mask |= (s))
 #define TCOAP_RESET_STATUS(h,s)      ((h)->statuses_mask &= ~(s))
@@ -95,6 +100,10 @@ tcoap_error decoding_options(const tcoap_data * const response,
  */
 uint32_t fill_payload(uint8_t * const buf, const tcoap_data * const payload);
 
+
+#ifdef  __cplusplus
+}
+#endif
 
 
 #endif /* __TCOAP_UTILS_H */

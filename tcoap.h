@@ -22,6 +22,11 @@
 #include <stdbool.h>
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 #ifndef NUUL
 #define NULL ((void *)0)
 #endif /* NUUL */
@@ -425,5 +430,9 @@ tcoap_error tcoap_rx_byte(tcoap_handle * const handle, const uint8_t byte);
  */
 tcoap_error tcoap_rx_packet(tcoap_handle * const handle, const uint8_t * buf, const uint32_t len);
 
+
+#ifdef  __cplusplus
+}
+#endif
 
 #endif /* __TCOAP_H */

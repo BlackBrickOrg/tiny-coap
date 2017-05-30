@@ -15,6 +15,11 @@
 #include "tcoap.h"
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 typedef enum {
 
     TCOPA_BLOCK_SZX_VAL_0       = 16,
@@ -88,5 +93,9 @@ void tcoap_extract_block2_from_opt(const tcoap_option_data * const block2, tcoap
  */
 const tcoap_option_data * tcoap_find_option_by_number(const tcoap_option_data * options, const uint16_t opt_num);
 
+
+#ifdef  __cplusplus
+}
+#endif
 
 #endif /* __TCOAP_HELPERS_H */
