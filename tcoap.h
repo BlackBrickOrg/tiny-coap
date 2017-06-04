@@ -9,7 +9,7 @@
  *
  * 1) californium   https://github.com/eclipse/californium
  *
- * Aims: Implementation of client CoAP for mcu with ram 1-4 kB via GSM/NB-IoT.
+ * Aims: Implementation of CoAP client for mcu with ram 1-4 kB.
  *
  */
 
@@ -187,7 +187,7 @@ typedef enum {
 /**
   * Critical    = (optnum & 1)
   * UnSafe      = (optnum & 2)
-  * NoCacheKey  = ((optnum & 0x1e) == 0x1c)
+  * NoCacheKey  = (optnum & 0x1e) == 0x1c
   *
   */
 typedef enum {
@@ -285,8 +285,8 @@ typedef struct tcoap_request_descriptor {
     /**
      * @brief Callback with results of request
      *
-     * @param reqd - pointer on the request data struct 'tcoap_request_descriptor'
-     * @param result - pointer on result data struct 'tcoap_result_data'
+     * @param reqd - pointer on the request data (struct 'tcoap_request_descriptor')
+     * @param result - pointer on result data (struct 'tcoap_result_data')
      */
     void (* response_callback) (const struct tcoap_request_descriptor * const reqd, const struct tcoap_result_data * const result);
 
@@ -315,29 +315,29 @@ extern tcoap_error tcoap_tx_data(tcoap_handle * const handle, const uint8_t * bu
 
 
 /**
- * @brief In this function user should implement a response waiting functionality. 
- *        This function should returns control when timeout will be expired or 
+ * @brief In this function user should implement a functionality of waiting response.
+ *        This function has to return a control when timeout will expired or
  *        when response from server will be received.
  */
 extern tcoap_error tcoap_wait_event(tcoap_handle * const handle, const uint32_t timeout_ms);
 
 
 /**
- * @brief In this function 'tcoap' lib notify user about events. 
+ * @brief Through this function the 'tcoap' lib will be notifing about events.
  *        See possible events here 'tcoap_out_signal'.
  */
 extern tcoap_error tcoap_tx_signal(tcoap_handle * const handle, const tcoap_out_signal signal);
 
 
 /**
- * @brief In this function user should implement generating of message id.
+ * @brief In this function user should implement a generating of message id.
  * 
  */
 extern uint16_t tcoap_get_message_id(tcoap_handle * const handle);
 
 
 /**
- * @brief In this function user should implement generating of token.
+ * @brief In this function user should implement a generating of token.
  * 
  */
 extern tcoap_error tcoap_fill_token(tcoap_handle * const handle, uint8_t * token, const uint32_t tkl);
@@ -353,31 +353,31 @@ extern void tcoap_debug_print_payload(tcoap_handle * const handle, const char * 
 
 
 /**
- * @brief In this function user should implement allocating mem block.
- *        In simple case it may be a static buffer. The 'TCOAP' will make a
- *        two calls of this functions before start (rx and tx buffer).
- *        So you should have a minimum two separate block of memory.
+ * @brief In this function user should implement an allocating block of memory.
+ *        In simple case it may be a static buffer. The 'TCOAP' will make
+ *        two calls of this function before starting work (for rx and tx buffers).
+ *        So, you should have minimum two separate blocks of memory.
  * 
  */
 extern tcoap_error tcoap_alloc_mem_block(uint8_t ** block, const uint32_t min_len);
 
 
 /**
- * @brief In this function user should implement freeing mem block.
+ * @brief In this function user should implement a freeing mem block.
  * 
  */
 extern tcoap_error tcoap_free_mem_block(uint8_t * block, const uint32_t min_len);
 
 
 /**
- * @brief In this function user should implement copying mem block.
+ * @brief In this function user should implement a copying mem block.
  *
  */
 extern void mem_copy(void * dst, const void * src, uint32_t cnt);
 
 
 /**
- * @brief In this function user should implement comparing two mem blocks.
+ * @brief In this function user should implement a comparing two mem blocks.
  *
  */
 extern bool mem_cmp(const void * dst, const void * src, uint32_t cnt);

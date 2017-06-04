@@ -4,7 +4,7 @@ Allows to add the CoAP functionality for embedded device.
 
 #### Features
 
-- very small memory consumption (in the common case it may be about of 200 bytes for rx/tx buffers, you can tune a PDU size)
+- very small memory consumption (in the common case it may be about of 200 bytes for both rx/tx buffers, you can tune a PDU size)
 
 - implemented CoAP over UDP [rfc7252](https://tools.ietf.org/html/rfc7252)
 
@@ -12,9 +12,9 @@ Allows to add the CoAP functionality for embedded device.
 
 - retransmition/acknowledgment functionality
 
-- parsing responses. Received data will be return to user via callback.
+- parsing of responses. Received data will be return an user via callback.
 
-- helpers for block-wise mode. The block-wise mode is located on higher layer that this implementation.
+- helpers for block-wise mode. The block-wise mode is located on higher layer than this implementation.
   See [wiki](https://github.com/Mozilla9/tiny-coap/wiki/Block-wise-mode-example) for example.
 
 
@@ -26,8 +26,80 @@ Allows to add the CoAP functionality for embedded device.
 #include "tcoap.h"
 
 ```
-  There are several functions in the `tcoap.h` which declared how `external`. You should provide it implementation in your code. See [wiki](https://github.com/Mozilla9/tiny-coap/wiki) for common case of their implementation.
+  There are several functions in the `tcoap.h` which are declared how `external`. You should provide it implementation in your code. See [wiki](https://github.com/Mozilla9/tiny-coap/wiki) for common case of their implementation.
 
+```
+/**
+ * @brief In this function user should implement a transmission given data via 
+ *        hardware interface (e.g. serial port)
+ * 
+ */
+extern tcoap_error 
+tcoap_tx_data(tcoap_handle * const handle, const uint8_t * buf, const uint32_t len);
+
+
+/**
+ * @brief In this function user should implement a functionality of waiting response. 
+ *        This function has to return a control when timeout will expired or 
+ *        when response from server will be received.
+ */
+extern tcoap_error 
+tcoap_wait_event(tcoap_handle * const handle, const uint32_t timeout_ms);
+
+
+/**
+ * @brief Through this function the 'tcoap' lib will be notifing about events.
+ *        See possible events here 'tcoap_out_signal'.
+ */
+extern tcoap_error 
+tcoap_tx_signal(tcoap_handle * const handle, const tcoap_out_signal signal);
+
+
+/**
+ * @brief In this function user should implement a generating of message id.
+ * 
+ */
+extern uint16_t 
+tcoap_get_message_id(tcoap_handle * const handle);
+
+
+/**
+ * @brief In this function user should implement a generating of token.
+ * 
+ */
+extern tcoap_error 
+tcoap_fill_token(tcoap_handle * const handle, uint8_t * token, const uint32_t tkl);
+
+
+/**
+ * @brief These functions are using for debug purpose, if user will enable debug mode.
+ * 
+ */
+extern void tcoap_debug_print_packet(tcoap_handle * const handle, const char * msg, uint8_t * data, const uint32_t len);
+extern void tcoap_debug_print_options(tcoap_handle * const handle, const char * msg, const tcoap_option_data * options);
+extern void tcoap_debug_print_payload(tcoap_handle * const handle, const char * msg, const tcoap_data * const payload);
+
+
+/**
+ * @brief In this function user should implement an allocating block of memory.
+ *        In the simple case it may be a static buffer. The 'TCOAP' will make
+ *        two calls of this function before starting work (for rx and tx buffer).
+ *        So, you should have minimum two separate blocks of memory.
+ * 
+ */
+extern tcoap_error tcoap_alloc_mem_block(uint8_t ** block, const uint32_t min_len);
+
+
+/**
+ * @brief In this function user should implement a freeing block of memory.
+ * 
+ */
+extern tcoap_error tcoap_free_mem_block(uint8_t * block, const uint32_t min_len);
+
+extern void mem_copy(void * dst, const void * src, uint32_t cnt);
+extern bool mem_cmp(const void * dst, const void * src, uint32_t cnt);
+
+```
 
 2) Define a `tcoap_handle` object, e.g.
 
@@ -40,12 +112,12 @@ tcoap_handle tc_handle = {
 ```
 
 
-3) Implement a transfer of incoming data from your hardware interface (e.g. serial port) to the `tcoap` via functions `tcoap_rx_byte` or `tcoap_rx_packet`. E.g.
+3) Implement a transfer of incoming data from your hardware interface (e.g. serial port) to the `tcoap` either `tcoap_rx_byte` or `tcoap_rx_packet`. E.g.
 
 ```
 void uart1_rx_irq_handler()
 {
-    uint8_t byte = UART1_DR;    
+    uint8_t byte = UART1->DR;    
     tcoap_rx_byte(&tc_handle, byte);
 }
 
