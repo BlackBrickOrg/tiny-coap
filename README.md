@@ -12,9 +12,9 @@ Allows to add the CoAP functionality for embedded device.
 
 - retransmition/acknowledgment functionality
 
-- parsing of responses. Received data will be return an user via callback.
+- parsing of responses. Received data will be return to the user via callback.
 
-- helpers for block-wise mode. The block-wise mode is located on higher layer than this implementation.
+- helpers for block-wise mode. The block-wise mode is located on the higher layer than this implementation.
   See [wiki](https://github.com/Mozilla9/tiny-coap/wiki/Block-wise-mode-example) for example.
 
 
@@ -48,7 +48,7 @@ tcoap_wait_event(tcoap_handle * const handle, const uint32_t timeout_ms);
 
 
 /**
- * @brief Through this function the 'tcoap' lib will be notifing about events.
+ * @brief Through this function the 'tcoap' lib will be notifying about events.
  *        See possible events here 'tcoap_out_signal'.
  */
 extern tcoap_error 

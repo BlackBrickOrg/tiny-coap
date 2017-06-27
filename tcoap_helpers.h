@@ -22,20 +22,20 @@ extern "C" {
 
 typedef enum {
 
-    TCOPA_BLOCK_SZX_VAL_0       = 16,
-    TCOPA_BLOCK_SZX_VAL_1       = 32,
-    TCOPA_BLOCK_SZX_VAL_2       = 64,
-    TCOPA_BLOCK_SZX_VAL_3       = 128,
-    TCOPA_BLOCK_SZX_VAL_4       = 256,
-    TCOPA_BLOCK_SZX_VAL_5       = 512,
-    TCOPA_BLOCK_SZX_VAL_6       = 1024,
+    TCOAP_BLOCK_SZX_VAL_0       = 16,
+    TCOAP_BLOCK_SZX_VAL_1       = 32,
+    TCOAP_BLOCK_SZX_VAL_2       = 64,
+    TCOAP_BLOCK_SZX_VAL_3       = 128,
+    TCOAP_BLOCK_SZX_VAL_4       = 256,
+    TCOAP_BLOCK_SZX_VAL_5       = 512,
+    TCOAP_BLOCK_SZX_VAL_6       = 1024,
 
     /**
      * Reserved, i.e., MUST NOT be sent and
      * MUST lead to a 4.00 Bad Request response
      * code upon reception in a request.
      */
-    TCOPA_BLOCK_SZX_VAL_7       = 0
+    TCOAP_BLOCK_SZX_VAL_7       = 0
 
 } tcoap_blockwise_szx;
 

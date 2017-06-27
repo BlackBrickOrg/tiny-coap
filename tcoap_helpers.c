@@ -19,28 +19,28 @@ uint16_t tcoap_decode_szx_to_size(const uint8_t szx)
     switch (szx)
     {
         case 0:
-            return TCOPA_BLOCK_SZX_VAL_0;
+            return TCOAP_BLOCK_SZX_VAL_0;
 
         case 1:
-            return TCOPA_BLOCK_SZX_VAL_1;
+            return TCOAP_BLOCK_SZX_VAL_1;
 
         case 2:
-            return TCOPA_BLOCK_SZX_VAL_2;
+            return TCOAP_BLOCK_SZX_VAL_2;
 
         case 3:
-            return TCOPA_BLOCK_SZX_VAL_3;
+            return TCOAP_BLOCK_SZX_VAL_3;
 
         case 4:
-            return TCOPA_BLOCK_SZX_VAL_4;
+            return TCOAP_BLOCK_SZX_VAL_4;
 
         case 5:
-            return TCOPA_BLOCK_SZX_VAL_5;
+            return TCOAP_BLOCK_SZX_VAL_5;
 
         case 6:
-            return TCOPA_BLOCK_SZX_VAL_6;
+            return TCOAP_BLOCK_SZX_VAL_6;
 
         default:
-            return TCOPA_BLOCK_SZX_VAL_7;
+            return TCOAP_BLOCK_SZX_VAL_7;
     }
 }
 
